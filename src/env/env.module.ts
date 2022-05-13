@@ -12,18 +12,25 @@ import { getEnvs, getMode, joinMode } from 'modern-v';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: EnvModule.JOINED.env,
-      ignoreEnvFile: EnvModule.MODE === 'prod',
+      ignoreEnvFile: EnvModule.MODE === 'production',
     }),
   ],
 })
 export class EnvModule {
-  static readonly MODE = getMode({ strict: true });
+  static readonly MODE = getMode({
+    strict: true,
+    list: ['development', 'test', 'production'],
+  });
+  static readonly isNotProduction = EnvModule.MODE !== 'production';
   static readonly JOINED = joinMode(EnvModule.MODE, {
     env: '.env.',
   });
   static ENVS = getEnvs({
-    F: '',
-    FOO: '',
+    DB_HOST: '',
+    DB_PORT: '',
+    DB_USERNAME: '',
+    DB_PASSWORD: '',
+    DB_NAME: '',
   });
   static config = {
     mode: EnvModule.MODE,
@@ -34,8 +41,11 @@ export class EnvModule {
   static forRoot(options: EnvModuleOptions = { test: '' }): DynamicModule {
     /* Re-load */
     this.ENVS = getEnvs({
-      F: '',
-      FOO: '',
+      DB_HOST: '',
+      DB_PORT: '',
+      DB_USERNAME: '',
+      DB_PASSWORD: '',
+      DB_NAME: '',
     });
 
     this.config = {
