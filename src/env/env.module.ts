@@ -33,7 +33,11 @@ export class EnvModule {
       DB_USERNAME: '',
       DB_PASSWORD: '',
       DB_NAME: '',
+      MAILGUN_API_KEY: '',
+      MAILGUN_DOMAIN_NAME: '',
+      MAILGUN_FROM_EMAIL: '',
       RTIME_INTERVAL: '',
+      CONFIRM_URI: '',
     });
 
   static getConfig = () => ({

@@ -3,7 +3,7 @@ import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
 import { KEY_PUBKEY, KEY_ROLES, KEY_USER } from 'src/common/constants';
 import { executionToGqlContext } from '../common/functions';
-import { AllowedRoles } from './allow.decorator';
+import { AllowedRoles } from './auth.interface';
 
 @Injectable()
 export class AuthGuard implements CanActivate {

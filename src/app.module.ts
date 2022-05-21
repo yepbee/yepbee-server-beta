@@ -6,7 +6,6 @@ import {
   NestModule,
   RequestMethod,
 } from '@nestjs/common';
-import { EnvModule } from './env/env.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -15,36 +14,28 @@ import { AuthModule } from './auth/auth.module';
 import { AuthMiddleware } from './auth/auth.middleware';
 import { RtimeModule } from './rtime/rtime.module';
 import { KEY_PUBKEY, KEY_USER } from './common/constants';
-
-const {
-  isNotProduction,
-  ENVS: {
-    //
-    DB_HOST,
-    DB_PORT,
-    DB_USERNAME,
-    DB_PASSWORD,
-    DB_NAME,
-    RTIME_INTERVAL,
-  },
-} = EnvModule;
+import { MailModule } from './mail/mail.module';
+import { EnvModule as _ } from './env/env.module';
+import { Verification } from './users/entities/verification.entity';
+import { User } from './users/entities/user.entity';
 
 @Module({
   imports: [
-    EnvModule.forRoot(),
+    _.forRoot(), // EnvModule
     // ---------------------------
     /* PostgreSQL */
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: DB_HOST,
-      port: +DB_PORT,
-      username: DB_USERNAME,
-      password: DB_PASSWORD,
-      database: DB_NAME,
-      synchronize: isNotProduction,
-      logging: isNotProduction,
+      host: _.ENVS.DB_HOST,
+      port: +_.ENVS.DB_PORT,
+      username: _.ENVS.DB_USERNAME,
+      password: _.ENVS.DB_PASSWORD,
+      database: _.ENVS.DB_NAME,
+      synchronize: _.isNotProduction,
+      logging: _.isNotProduction,
       autoLoadEntities: true,
     }),
+    TypeOrmModule.forFeature([Verification, User]), // for app.controller
     /* GraphQL */
     GraphQLModule.forRoot<ApolloDriverConfig>({
       autoSchemaFile: true,
@@ -53,15 +44,20 @@ const {
         [KEY_PUBKEY]: req[KEY_PUBKEY],
         [KEY_USER]: req[KEY_USER],
       }),
-      debug: isNotProduction,
-      playground: isNotProduction,
+      debug: _.isNotProduction,
+      playground: _.isNotProduction,
     }),
     // ---------------------------
+    MailModule.forRoot({
+      apiKey: _.ENVS.MAILGUN_API_KEY,
+      domain: _.ENVS.MAILGUN_DOMAIN_NAME,
+      fromEmail: _.ENVS.MAILGUN_FROM_EMAIL,
+    }),
+    RtimeModule.forRoot({
+      interval: +_.ENVS.RTIME_INTERVAL,
+    }),
     UsersModule.forRoot(),
     AuthModule.forRoot(),
-    RtimeModule.forRoot({
-      interval: +RTIME_INTERVAL,
-    }),
   ],
   controllers: [AppController],
   providers: [AppService],

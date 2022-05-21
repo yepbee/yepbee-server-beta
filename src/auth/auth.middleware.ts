@@ -26,6 +26,7 @@ export class AuthMiddleware implements NestMiddleware<Request, Response> {
 
       if (this.verifyToken(tokenType, tokenBody)) {
         const [pubkey] = splitOnce(tokenBody, '.');
+        console.log(pubkey);
         req[KEY_PUBKEY] = pubkey;
         if (pubkey) {
           req[KEY_USER] = await this.authService.findUserByPubkey(pubkey);
