@@ -1,6 +1,5 @@
 import { SetMetadata } from '@nestjs/common';
-import { AuthRole, KEY_ROLES } from 'src/common/constants';
-
-export type AllowedRoles = keyof typeof AuthRole;
+import { KEY_ROLES } from 'src/common/constants';
+import { AllowedRoles } from './auth.interface';
 
 export const Allow = (roles: AllowedRoles[]) => SetMetadata(KEY_ROLES, roles);

@@ -5,13 +5,14 @@ import { UsersResolver } from './users.resolver';
 import { UsersService } from './users.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
+import { Verification } from './entities/verification.entity';
 
 @Module({})
 export class UsersModule {
   static forRoot(options: UsersModuleOptions = { test: '' }): DynamicModule {
     return {
       module: UsersModule,
-      imports: [TypeOrmModule.forFeature([User])],
+      imports: [TypeOrmModule.forFeature([User, Verification])],
       providers: [
         {
           provide: KEY_OPTIONS,

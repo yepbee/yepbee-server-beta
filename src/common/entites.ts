@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 
 @ObjectType()
-export class CoreEntity {
+export class PureEntity {
   @Field(() => Number)
   @IsNumber()
   @PrimaryGeneratedColumn()
@@ -17,7 +17,10 @@ export class CoreEntity {
   @IsDate()
   @CreateDateColumn()
   createdAt: Date;
+}
 
+@ObjectType()
+export class CoreEntity extends PureEntity {
   @Field(() => Date)
   @IsDate()
   @UpdateDateColumn()

@@ -1,3 +1,10 @@
+export const DEFAULT_PORT = 8000;
+
+export const GLOBAL_OPTIONS = {
+  baseUrl: `localhost:${DEFAULT_PORT}`,
+  isInitialized: false,
+};
+
 export const KEY_OPTIONS = 'options';
 
 export const KEY_PUBKEY = 'pubkey';

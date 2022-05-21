@@ -1,16 +1,20 @@
 import { Column, Entity, Unique } from 'typeorm';
 import { CoreEntity } from 'src/common/entites';
-import { InputType, ObjectType, Field, ArgsType } from '@nestjs/graphql';
-import { IsHash, IsHexadecimal, Length } from 'class-validator';
+import { InputType, ObjectType, Field } from '@nestjs/graphql';
 import { IsWalletPublicKey } from 'src/common/validators';
+import { IsEmail } from 'class-validator';
 
 @InputType({ isAbstract: true })
 @ObjectType()
 @Entity()
-@Unique(['pubkey'])
+@Unique(['pubkey', 'email'])
 export class User extends CoreEntity {
   @Field(() => String)
   @IsWalletPublicKey()
-  @Column()
+  @Column({ unique: true })
   pubkey: string; // = Id
+  @Field(() => String)
+  @IsEmail()
+  @Column({ unique: true })
+  email: string; // = Email
 }
