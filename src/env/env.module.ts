@@ -12,37 +12,43 @@ import { getEnvs, getMode, joinMode } from 'modern-v';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: EnvModule.JOINED.env,
-      ignoreEnvFile: EnvModule.MODE === 'prod',
+      ignoreEnvFile: EnvModule.isNotProduction === false,
     }),
   ],
 })
 export class EnvModule {
-  static readonly MODE = getMode({ strict: true });
+  static readonly MODE = getMode({
+    strict: true,
+    list: ['development', 'test', 'production'],
+  });
+  static readonly isNotProduction = EnvModule.MODE !== 'production';
   static readonly JOINED = joinMode(EnvModule.MODE, {
     env: '.env.',
   });
-  static ENVS = getEnvs({
-    F: '',
-    FOO: '',
-  });
-  static config = {
+
+  static getEnvs = () =>
+    getEnvs({
+      DB_HOST: '',
+      DB_PORT: '',
+      DB_USERNAME: '',
+      DB_PASSWORD: '',
+      DB_NAME: '',
+      RTIME_INTERVAL: '',
+    });
+
+  static getConfig = () => ({
     mode: EnvModule.MODE,
     joined: EnvModule.JOINED,
     envs: EnvModule.ENVS,
-  };
+  });
+
+  static ENVS = EnvModule.getEnvs();
+  static config = EnvModule.getConfig();
 
   static forRoot(options: EnvModuleOptions = { test: '' }): DynamicModule {
     /* Re-load */
-    this.ENVS = getEnvs({
-      F: '',
-      FOO: '',
-    });
-
-    this.config = {
-      mode: this.MODE,
-      joined: this.JOINED,
-      envs: this.ENVS,
-    };
+    this.ENVS = this.getEnvs();
+    this.config = this.getConfig();
     /* ******* */
 
     return {
