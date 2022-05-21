@@ -10,6 +10,6 @@ export class EnvService {
     @Inject(KEY_OPTIONS) private readonly options: EnvModuleOptions,
   ) {
     console.log(options);
-    console.log(config.envs.FOO);
+    console.log(config.envs);
   }
 }
