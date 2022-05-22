@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { AsyncTryCatch } from 'src/common/decorators';
 import { Err, Ok } from 'src/common/result/result.function';
 import { Repository } from 'typeorm';
-import { SignupInput, SignupOutput } from './dtos/signup.dto';
+import { SignupError, SignupInput, SignupOutput } from './dtos/signup.dto';
 import { User } from './entities/user.entity';
 import { MailService } from '../mail/mail.service';
 import { Verification } from './entities/verification.entity';
@@ -21,11 +21,15 @@ export class UsersService {
     private readonly mailService: MailService,
   ) {}
 
-  @AsyncTryCatch()
+  @AsyncTryCatch<SignupError>({
+    errValue: (msg) => ({
+      msg,
+    }),
+  })
   async signup(pubkey: string, { email }: SignupInput): Promise<SignupOutput> {
     const code = nanoid();
     const redirectUri =
-      GLOBAL_OPTIONS.baseUrl +
+      GLOBAL_OPTIONS.getOne('baseUrl') +
       this.envService
         .get('CONFIRM_URI')
         .replace('{{pubkey}}', pubkey)
@@ -38,10 +42,11 @@ export class UsersService {
       },
     ]);
     if (user)
-      return Err(
-        'user already exists. ' +
-          `pubkey: ${user.pubkey} / email: ${user.email}`,
-      );
+      return Err({
+        msg: 'user already exists.',
+        pubkey: user.pubkey,
+        email: user.email,
+      });
 
     await this.mailService.sendVerificationEmail(email, redirectUri);
 

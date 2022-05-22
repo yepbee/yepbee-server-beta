@@ -1,5 +1,5 @@
-import { ArgsType, ObjectType, PickType } from '@nestjs/graphql';
-import { CoreOutput } from 'src/common/dtos';
+import { ArgsType, Field, ObjectType, PickType } from '@nestjs/graphql';
+import { Result } from 'src/common/interfaces';
 import { ResField } from 'src/common/result/result.decorator';
 import { User } from '../entities/user.entity';
 import { Verification } from '../entities/verification.entity';
@@ -15,7 +15,19 @@ export class SignupResult extends PickType(
 ) {}
 
 @ObjectType()
-export class SignupOutput extends CoreOutput<boolean> {
+export class SignupError {
+  @Field(() => String)
+  msg: string;
+  @Field(() => String, { nullable: true })
+  pubkey?: string;
+  @Field(() => String, { nullable: true })
+  email?: string;
+}
+
+@ObjectType()
+export class SignupOutput implements Result<boolean, SignupError> {
   @ResField(() => Boolean)
   ok?: boolean;
+  @ResField(() => SignupError)
+  error?: SignupError;
 }

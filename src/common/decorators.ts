@@ -1,7 +1,15 @@
 import { EnvModule } from 'src/env/env.module';
 import { Err } from './result/result.function';
 
-export function TryCatch(originMsg = '') {
+type TryCatchOption<E> = {
+  originMsg?: string;
+  errValue?: (e: string) => E;
+};
+
+export function TryCatch<E = string>({
+  originMsg = '',
+  errValue,
+}: TryCatchOption<E> = {}) {
   return function (_target: any, _key: string, desc: PropertyDescriptor) {
     const origin = desc.value;
 
@@ -11,13 +19,18 @@ export function TryCatch(originMsg = '') {
       } catch (e) {
         if (EnvModule.isNotProduction) console.error(e); // put
         if (e.message) e = e.message;
-        return Err(`${originMsg}${e}`);
+        const msg = `${originMsg}${e}`;
+        if (!errValue) return Err(msg);
+        return Err(errValue(msg));
       }
     };
   };
 }
 
-export function AsyncTryCatch(originMsg = '') {
+export function AsyncTryCatch<E = string>({
+  originMsg = '',
+  errValue,
+}: TryCatchOption<E> = {}) {
   return function (_target: any, _key: string, desc: PropertyDescriptor) {
     const origin = desc.value;
 
@@ -27,7 +40,9 @@ export function AsyncTryCatch(originMsg = '') {
       } catch (e) {
         if (EnvModule.isNotProduction) console.error(e); // put
         if (e.message) e = e.message;
-        return Err(`${originMsg}${e}`);
+        const msg = `${originMsg}${e}`;
+        if (!errValue) return Err(msg);
+        return Err(errValue(msg));
       }
     };
   };
