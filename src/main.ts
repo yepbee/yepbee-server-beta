@@ -9,9 +9,11 @@ async function bootstrap() {
 
   await app.listen(DEFAULT_PORT);
 
-  GLOBAL_OPTIONS.baseUrl = await app.getUrl();
-  GLOBAL_OPTIONS.isInitialized = true;
+  GLOBAL_OPTIONS.set({
+    baseUrl: await app.getUrl(),
+    isInitialized: true,
+  });
 
-  console.log(GLOBAL_OPTIONS);
+  console.log(GLOBAL_OPTIONS.getAll());
 }
 bootstrap();
