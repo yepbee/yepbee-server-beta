@@ -1,7 +1,9 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { RtimeId } from './common/constants';
 import { AsyncTryCatch } from './common/decorators';
+import { throwException } from './common/functions';
 import { CoreResult } from './common/interfaces';
 import { Ok } from './common/result/result.function';
 import { EnvService } from './env/env.service';
@@ -19,11 +21,17 @@ export class AppService {
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
   ) {}
+
   welcome(): string {
     return 'Welcome To Retrip!';
   }
-  rtime(): string {
-    return this.rtimeService.getTime();
+
+  async rtime(id: RtimeId): Promise<string> {
+    if (id === RtimeId.Walking) {
+      await this.rtimeService.updateAndSaveTime(id);
+      return this.rtimeService.getTime(id);
+    }
+    return this.rtimeService.updateAndGetTime(id);
   }
 
   @AsyncTryCatch()
@@ -31,8 +39,7 @@ export class AppService {
     const verification = await this.verificationsRepository.findOneBy({
       code,
     });
-    if (!verification)
-      throw new HttpException('Wrong Access', HttpStatus.FORBIDDEN);
+    if (!verification) throwException('Wrong Access', HttpStatus.FORBIDDEN);
 
     await this.verificationsRepository.delete({
       pubkey: verification.pubkey,

@@ -1,6 +1,9 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
+import { web3 } from '@retrip/js';
 import { CancelableRequest, Response } from 'got';
 import internal from 'stream';
+import { throwException } from './functions';
+export * as web3 from '@solana/web3.js';
 
 export interface Result<Ok, Err> {
   ok?: Ok;
@@ -11,6 +14,10 @@ export interface CoreResult {
   ok?: boolean;
   error?: string;
 }
+
+export type Enum<E> = Record<keyof E, number | string> & {
+  [k: number]: keyof E;
+};
 
 export type AnyObject = Record<string, unknown>;
 
@@ -32,18 +39,15 @@ export class GlobalOptions {
     baseUrl: `localhost:8000`,
     isInitialized: false,
   };
-  private readonly throwException = () => {
-    throw new HttpException(
-      'Not Initialized',
-      HttpStatus.INTERNAL_SERVER_ERROR,
-    );
-  };
+  private readonly throwNotInitException = () =>
+    throwException('Not Initialized', HttpStatus.INTERNAL_SERVER_ERROR);
+
   getAll(): GlobalOption {
     return this._;
   }
 
   get(keys: (keyof GlobalOption)[]): GlobalOption {
-    if (!this._.isInitialized) this.throwException();
+    if (!this._.isInitialized) this.throwNotInitException();
     const result = {};
     for (const key of keys) {
       result[key] = this._[key];
@@ -51,7 +55,7 @@ export class GlobalOptions {
     return result as GlobalOption;
   }
   getOne(key: keyof GlobalOption) {
-    if (!this._.isInitialized) this.throwException();
+    if (!this._.isInitialized) this.throwNotInitException();
     return this._[key];
   }
   set(obj: Partial<GlobalOption>): GlobalOptions {
@@ -68,3 +72,5 @@ export class GlobalOptions {
     return this;
   }
 }
+
+export type Cluster = web3.Cluster;

@@ -36,8 +36,17 @@ export class EnvModule {
       MAILGUN_API_KEY: '',
       MAILGUN_DOMAIN_NAME: '',
       MAILGUN_FROM_EMAIL: '',
-      RTIME_INTERVAL: '',
+      H3_WALKING_RESOLUTION: '',
+      RTIME_LENGTH: '',
+      RTIME_AUTHTOKEN_INTERVAL: '',
+      RTIME_WALKING_INTERVAL: '',
+      RTIME_DATABASE_PRESERVED_TIME: '',
       CONFIRM_URI: '',
+      WEB3_CLUSTER_API_URL: '',
+      WEB3_MASTER_SECRET_KEY: '',
+      VALIDATOR_TIME_DISTANCE_MIN_BOUNDARY: '',
+      VALIDATOR_TIME_DISTANCE_MAX_BOUNDARY: '',
+      SERVICE_MEMBERSHIP_FEE: '',
     });
 
   static getConfig = () => ({

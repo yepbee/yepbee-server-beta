@@ -1,23 +1,28 @@
-import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { GraphQLModule } from '@nestjs/graphql';
 import {
   MiddlewareConsumer,
   Module,
   NestModule,
   RequestMethod,
 } from '@nestjs/common';
-import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { Cluster } from './common/interfaces';
+import { AppController } from './app.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UsersModule } from './users/users.module';
-import { AuthModule } from './auth/auth.module';
-import { AuthMiddleware } from './auth/auth.middleware';
-import { RtimeModule } from './rtime/rtime.module';
-import { KEY_PUBKEY, KEY_USER } from './common/constants';
 import { MailModule } from './mail/mail.module';
+import { Web3Module } from './web3/web3.module';
+import { GraphQLModule } from '@nestjs/graphql';
+import { AuthModule } from './auth/auth.module';
 import { EnvModule as _ } from './env/env.module';
-import { Verification } from './users/entities/verification.entity';
+import { RtimeModule } from './rtime/rtime.module';
+import { UsersModule } from './users/users.module';
 import { User } from './users/entities/user.entity';
+import { AuthMiddleware } from './auth/auth.middleware';
+import { KEY_PUBKEY, KEY_RTIME, KEY_USER, RtimeId } from './common/constants';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { Verification } from './users/entities/verification.entity';
+import { VerificationModule } from './verification/verification.module';
+import { ValidationModule } from './validation/validation.module';
+import { ValidProperty } from './users/entities/validProperty.entity';
 
 @Module({
   imports: [
@@ -34,14 +39,16 @@ import { User } from './users/entities/user.entity';
       synchronize: _.isNotProduction,
       logging: _.isNotProduction,
       autoLoadEntities: true,
+      dropSchema: _.isNotProduction,
     }),
-    TypeOrmModule.forFeature([Verification, User]), // for app.controller
+    TypeOrmModule.forFeature([ValidProperty, Verification, User]), // for app.controller
     /* GraphQL */
     GraphQLModule.forRoot<ApolloDriverConfig>({
       autoSchemaFile: true,
       driver: ApolloDriver,
       context: ({ req }) => ({
         [KEY_PUBKEY]: req[KEY_PUBKEY],
+        [KEY_RTIME]: req[KEY_RTIME],
         [KEY_USER]: req[KEY_USER],
       }),
       debug: _.isNotProduction,
@@ -54,19 +61,40 @@ import { User } from './users/entities/user.entity';
       fromEmail: _.ENVS.MAILGUN_FROM_EMAIL,
     }),
     RtimeModule.forRoot({
-      interval: +_.ENVS.RTIME_INTERVAL,
+      length: +_.ENVS.RTIME_LENGTH,
+      intervals: {
+        [RtimeId.AuthToken]: +_.ENVS.RTIME_AUTHTOKEN_INTERVAL,
+        [RtimeId.Walking]: +_.ENVS.RTIME_WALKING_INTERVAL,
+      },
+      preservedTime: +_.ENVS.RTIME_DATABASE_PRESERVED_TIME,
     }),
     UsersModule.forRoot(),
     AuthModule.forRoot(),
+    Web3Module.forRoot({
+      clusterApiUrl: _.ENVS.WEB3_CLUSTER_API_URL as Cluster,
+      secretKey: Uint8Array.from(JSON.parse(_.ENVS.WEB3_MASTER_SECRET_KEY)),
+    }),
+    VerificationModule.forRoot(),
+    ValidationModule.forRoot({
+      timeDistanceMinBoundary: +_.ENVS.VALIDATOR_TIME_DISTANCE_MIN_BOUNDARY,
+      timeDistanceMaxBoundary: +_.ENVS.VALIDATOR_TIME_DISTANCE_MAX_BOUNDARY,
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(AuthMiddleware).forRoutes({
-      path: '*',
-      method: RequestMethod.POST,
-    });
+    consumer.apply(AuthMiddleware).forRoutes(
+      {
+        path: '*',
+        method: RequestMethod.POST,
+      },
+      // !TODO: Walking Guard
+      // {
+      //   path: `rtime?id=${RtimeId.Walking}`,
+      //   method: RequestMethod.GET,
+      // },
+    );
   }
 }

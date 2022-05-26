@@ -3,8 +3,7 @@ import { verifyAuthToken } from '@retrip/js';
 import { Request, Response } from 'express';
 import { ParamsDictionary } from 'express-serve-static-core';
 import { ParsedQs } from 'qs';
-import { KEY_PUBKEY, KEY_USER } from 'src/common/constants';
-import { splitOnce } from 'src/common/functions';
+import { KEY_PUBKEY, KEY_RTIME, KEY_USER, RtimeId } from 'src/common/constants';
 import { RtimeService } from 'src/rtime/rtime.service';
 import { AuthService } from './auth.service';
 
@@ -23,11 +22,14 @@ export class AuthMiddleware implements NestMiddleware<Request, Response> {
 
     if (typeof authorization === 'string') {
       const [tokenType, tokenBody] = authorization.split(' ');
-
+      console.log(tokenType, tokenBody);
       if (this.verifyToken(tokenType, tokenBody)) {
-        const [pubkey] = splitOnce(tokenBody, '.');
-        console.log(pubkey);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const [pubkey, _, rtime] = tokenBody.split('.');
+        console.log(pubkey, rtime);
+        req[KEY_RTIME] = rtime;
         req[KEY_PUBKEY] = pubkey;
+        console.log(req[KEY_PUBKEY]);
         if (pubkey) {
           req[KEY_USER] = await this.authService.findUserByPubkey(pubkey);
         }
@@ -39,7 +41,11 @@ export class AuthMiddleware implements NestMiddleware<Request, Response> {
   verifyToken(tokenType: string, tokenBody: string): boolean {
     switch (tokenType) {
       case 'utec':
-        return verifyAuthToken(tokenBody, this.rtimeService.getTime());
+        const currentRtime = this.rtimeService.updateAndGetTime(
+          RtimeId.AuthToken,
+        );
+        console.log('currentServerRtime:', currentRtime);
+        return verifyAuthToken(tokenBody, currentRtime);
       default:
         return false;
     }
