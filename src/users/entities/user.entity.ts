@@ -1,19 +1,41 @@
-import { Column, Entity, JoinTable, ManyToMany, Unique } from 'typeorm';
+import {
+  BeforeInsert,
+  Column,
+  Entity,
+  JoinColumn,
+  JoinTable,
+  ManyToMany,
+  OneToOne,
+} from 'typeorm';
 import { CoreEntity } from 'src/common/entites';
 import { InputType, ObjectType, Field } from '@nestjs/graphql';
 import { IsWalletPublicKey } from 'src/common/validators';
-import { IsEmail, IsHash, IsString, IsUrl, Length } from 'class-validator';
+import {
+  IsEmail,
+  IsString,
+  IsUrl,
+  Length,
+  ValidateNested,
+} from 'class-validator';
 import { nanoid } from 'nanoid';
+import { ValidProperty } from './validProperty.entity';
+import { RTIME_LENGTH } from 'src/rtime/rtime.constant';
 
 @InputType({ isAbstract: true })
 @ObjectType()
 @Entity()
-@Unique(['pubkey', 'email'])
 export class User extends CoreEntity {
   @Field(() => String)
-  @IsHash('sha256')
-  @Column({ unique: true, nullable: true })
-  joinedTx?: string; // joined dapp peer
+  @IsString()
+  @Length(RTIME_LENGTH, RTIME_LENGTH)
+  @Column()
+  rtime: string;
+
+  @Field(() => ValidProperty, { nullable: true })
+  @ValidateNested()
+  @OneToOne(() => ValidProperty, { eager: true, cascade: true })
+  @JoinColumn({ name: 'validProperty' })
+  validProperty?: ValidProperty; // joined dapp peer
 
   @Field(() => String)
   @IsWalletPublicKey()
@@ -26,12 +48,12 @@ export class User extends CoreEntity {
   @Field(() => String, { nullable: true })
   @IsString()
   @Length(0, 20)
-  @Column({ default: `user${nanoid(6)}` })
+  @Column()
   nickname?: string;
   @Field(() => String, { nullable: true })
   @IsUrl()
   @Length(9, 1000)
-  @Column({ default: 'https://picsum.photos/200' })
+  @Column()
   photoUri?: string;
   @Field(() => String, { nullable: true })
   @IsString()
@@ -45,4 +67,16 @@ export class User extends CoreEntity {
   @ManyToMany(() => User, (user) => user.followers, { onDelete: 'CASCADE' })
   @JoinTable({ inverseJoinColumn: { name: 'following' } })
   following: User[];
+
+  @BeforeInsert()
+  insertDefaultValues() {
+    if (!this.nickname) {
+      this.nickname = `user${nanoid(6)}`;
+    }
+    if (!this.photoUri) {
+      this.photoUri = `https://picsum.photos/id/${Math.floor(
+        Math.random() * 1083 + 1,
+      )}/200`;
+    }
+  }
 }

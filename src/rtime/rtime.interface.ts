@@ -1,8 +1,12 @@
 import { nanoid } from 'nanoid';
+import { RtimeId } from 'src/common/constants';
 import { getUnixTime } from 'src/common/functions';
+import { RTIME_LENGTH } from './rtime.constant';
 
 export type RtimeModuleOptions = {
-  interval: number;
+  length: number;
+  intervals: Record<RtimeId, number>;
+  preservedTime: number;
 };
 
 export class Rtime {
@@ -19,7 +23,7 @@ export class Rtime {
   }
   reset() {
     this.unixTime = getUnixTime();
-    this.current = nanoid();
+    this.current = nanoid(RTIME_LENGTH);
   }
   verifedUpdate(): boolean {
     if (getUnixTime() > this.unixTime + this.interval) {

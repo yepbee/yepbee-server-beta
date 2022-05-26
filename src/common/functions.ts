@@ -1,8 +1,9 @@
 export { nanoid } from 'nanoid';
-import { ExecutionContext } from '@nestjs/common';
+import { ExecutionContext, HttpException } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { AnyObject, HeaderTokenType } from './interfaces';
 import * as FormData from 'form-data';
+import { snakeCase } from 'snake-case';
 
 /**
  *
@@ -40,4 +41,34 @@ export function makeForm(o: AnyObject) {
     form.append(k, o[k]);
   }
   return form;
+}
+
+export function throwException(
+  response: string | Record<string, any>,
+  status: number,
+) {
+  throw new HttpException(response, status);
+}
+
+export function enumIncludes<T>(_enum: T, _target: any): _target is T[keyof T] {
+  return Object.values(_enum).includes(_target as T[keyof T]);
+}
+
+export function classNameToString<T extends { constructor: { name: string } }>(
+  c: T,
+) {
+  return c.constructor.name;
+}
+
+export function stringToSnakeCase(s: string): string {
+  return snakeCase(s);
+}
+
+export function objectKeysToObject<T extends Record<string, unknown>>(o: T) {
+  const result: Record<keyof T, keyof T> = {} as any;
+  console.log(o);
+  for (const k in o) {
+    result[k] = k;
+  }
+  return result;
 }
