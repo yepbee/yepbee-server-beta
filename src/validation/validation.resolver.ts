@@ -6,6 +6,7 @@ import {
   EnqueueValidatingInput,
   EnqueueValidatingOutput,
 } from './dtos/enqueueValidating.dto';
+import { MintPhotoInput, MintPhotoOutput } from './dtos/mintPhoto.dto';
 import { ValidationService } from './validation.service';
 
 @Resolver()
@@ -13,7 +14,7 @@ export class ValidationResolver {
   constructor(private readonly validationsServise: ValidationService) {}
 
   @Mutation(() => EnqueueValidatingOutput)
-  @Allow(['ValidUser', 'User']) // will change
+  @Allow(['ValidUser']) // will change
   enqueueValidating(
     @AuthUser() user: User,
     @Args() enqueueValidatingInput: EnqueueValidatingInput,
@@ -22,5 +23,14 @@ export class ValidationResolver {
       user,
       enqueueValidatingInput,
     );
+  }
+
+  @Mutation(() => MintPhotoOutput)
+  @Allow(['ValidUser'])
+  mintPhoto(
+    @AuthUser() user: User,
+    @Args() mintPhotoInput: MintPhotoInput,
+  ): Promise<MintPhotoOutput> {
+    return this.validationsServise.mintPhoto(user, mintPhotoInput);
   }
 }
