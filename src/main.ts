@@ -1,11 +1,15 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { graphqlUploadExpress } from 'graphql-upload';
 import { GLOBAL_OPTIONS, DEFAULT_PORT } from './common/constants';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe());
+
+  // file receiver
+  app.use(graphqlUploadExpress({ maxFieldSize: 8 * 1000 * 1000 }));
 
   await app.listen(DEFAULT_PORT);
 

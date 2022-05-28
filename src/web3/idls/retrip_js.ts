@@ -36,6 +36,16 @@ export type RetripJs = {
           isSigner: false;
         },
         {
+          name: 'nftMint';
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: 'programNftTokenAccount';
+          isMut: true;
+          isSigner: false;
+        },
+        {
           name: 'whiteList';
           isMut: true;
           isSigner: true;
@@ -133,7 +143,17 @@ export type RetripJs = {
           isSigner: false;
         },
         {
+          name: 'nftMint';
+          isMut: true;
+          isSigner: false;
+        },
+        {
           name: 'programTokenAccount';
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: 'programNftTokenAccount';
           isMut: true;
           isSigner: false;
         },
@@ -144,6 +164,11 @@ export type RetripJs = {
         },
         {
           name: 'userTokenAccount';
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: 'userNftTokenAccount';
           isMut: true;
           isSigner: false;
         },
@@ -212,6 +237,140 @@ export type RetripJs = {
       ];
     },
     {
+      name: 'transferSystemNftToken';
+      accounts: [
+        {
+          name: 'rent';
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: 'systemProgram';
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: 'tokenProgram';
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: 'whiteList';
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: 'payer';
+          isMut: true;
+          isSigner: true;
+        },
+        {
+          name: 'nftMint';
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: 'programNftTokenAccount';
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: 'fromPubkey';
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: 'fromNftTokenAccount';
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: 'toNftTokenAccount';
+          isMut: true;
+          isSigner: false;
+        },
+      ];
+      args: [];
+    },
+    {
+      name: 'mintNftAsWhitelist';
+      accounts: [
+        {
+          name: 'rent';
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: 'systemProgram';
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: 'tokenProgram';
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: 'whiteList';
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: 'totalSupply';
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: 'payer';
+          isMut: true;
+          isSigner: true;
+        },
+        {
+          name: 'toPubkey';
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: 'nftMint';
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: 'programNftTokenAccount';
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: 'toNftTokenAccount';
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: 'tokenMetadataProgram';
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: 'metadata';
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: 'masterEdition';
+          isMut: true;
+          isSigner: false;
+        },
+      ];
+      args: [
+        {
+          name: 'mintArgs';
+          type: {
+            defined: 'MintArgs';
+          };
+        },
+      ];
+    },
+    {
       name: 'suggestAsWhitelist';
       accounts: [
         {
@@ -230,79 +389,6 @@ export type RetripJs = {
           name: 'suggestion';
           type: {
             defined: 'Suggestion';
-          };
-        },
-      ];
-    },
-    {
-      name: 'mintNftAsWhitelist';
-      accounts: [
-        {
-          name: 'whiteList';
-          isMut: true;
-          isSigner: false;
-        },
-        {
-          name: 'authority';
-          isMut: true;
-          isSigner: true;
-        },
-        {
-          name: 'totalSupply';
-          isMut: true;
-          isSigner: false;
-        },
-        {
-          name: 'metadata';
-          isMut: true;
-          isSigner: false;
-        },
-        {
-          name: 'masterEdition';
-          isMut: true;
-          isSigner: false;
-        },
-        {
-          name: 'mintAccount';
-          isMut: true;
-          isSigner: false;
-        },
-        {
-          name: 'tokenAccount';
-          isMut: true;
-          isSigner: false;
-        },
-        {
-          name: 'tokenProgram';
-          isMut: false;
-          isSigner: false;
-        },
-        {
-          name: 'tokenMetadataProgram';
-          isMut: false;
-          isSigner: false;
-        },
-        {
-          name: 'payer';
-          isMut: true;
-          isSigner: false;
-        },
-        {
-          name: 'rent';
-          isMut: false;
-          isSigner: false;
-        },
-        {
-          name: 'systemProgram';
-          isMut: false;
-          isSigner: false;
-        },
-      ];
-      args: [
-        {
-          name: 'mintArgs';
-          type: {
-            defined: 'MintArgs';
           };
         },
       ];
@@ -394,6 +480,10 @@ export type RetripJs = {
           {
             name: 'typeName';
             type: 'string';
+          },
+          {
+            name: 'royalty';
+            type: 'u16';
           },
         ];
       };
@@ -556,6 +646,11 @@ export type RetripJs = {
           index: false;
         },
         {
+          name: 'userNftTokenAccount';
+          type: 'string';
+          index: false;
+        },
+        {
           name: 'whitelist';
           type: 'string';
           index: false;
@@ -665,6 +760,16 @@ export const IDL: RetripJs = {
           isSigner: false,
         },
         {
+          name: 'nftMint',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'programNftTokenAccount',
+          isMut: true,
+          isSigner: false,
+        },
+        {
           name: 'whiteList',
           isMut: true,
           isSigner: true,
@@ -762,7 +867,17 @@ export const IDL: RetripJs = {
           isSigner: false,
         },
         {
+          name: 'nftMint',
+          isMut: true,
+          isSigner: false,
+        },
+        {
           name: 'programTokenAccount',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'programNftTokenAccount',
           isMut: true,
           isSigner: false,
         },
@@ -773,6 +888,11 @@ export const IDL: RetripJs = {
         },
         {
           name: 'userTokenAccount',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'userNftTokenAccount',
           isMut: true,
           isSigner: false,
         },
@@ -841,6 +961,140 @@ export const IDL: RetripJs = {
       ],
     },
     {
+      name: 'transferSystemNftToken',
+      accounts: [
+        {
+          name: 'rent',
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: 'systemProgram',
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: 'tokenProgram',
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: 'whiteList',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'payer',
+          isMut: true,
+          isSigner: true,
+        },
+        {
+          name: 'nftMint',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'programNftTokenAccount',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'fromPubkey',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'fromNftTokenAccount',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'toNftTokenAccount',
+          isMut: true,
+          isSigner: false,
+        },
+      ],
+      args: [],
+    },
+    {
+      name: 'mintNftAsWhitelist',
+      accounts: [
+        {
+          name: 'rent',
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: 'systemProgram',
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: 'tokenProgram',
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: 'whiteList',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'totalSupply',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'payer',
+          isMut: true,
+          isSigner: true,
+        },
+        {
+          name: 'toPubkey',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'nftMint',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'programNftTokenAccount',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'toNftTokenAccount',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'tokenMetadataProgram',
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: 'metadata',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'masterEdition',
+          isMut: true,
+          isSigner: false,
+        },
+      ],
+      args: [
+        {
+          name: 'mintArgs',
+          type: {
+            defined: 'MintArgs',
+          },
+        },
+      ],
+    },
+    {
       name: 'suggestAsWhitelist',
       accounts: [
         {
@@ -859,79 +1113,6 @@ export const IDL: RetripJs = {
           name: 'suggestion',
           type: {
             defined: 'Suggestion',
-          },
-        },
-      ],
-    },
-    {
-      name: 'mintNftAsWhitelist',
-      accounts: [
-        {
-          name: 'whiteList',
-          isMut: true,
-          isSigner: false,
-        },
-        {
-          name: 'authority',
-          isMut: true,
-          isSigner: true,
-        },
-        {
-          name: 'totalSupply',
-          isMut: true,
-          isSigner: false,
-        },
-        {
-          name: 'metadata',
-          isMut: true,
-          isSigner: false,
-        },
-        {
-          name: 'masterEdition',
-          isMut: true,
-          isSigner: false,
-        },
-        {
-          name: 'mintAccount',
-          isMut: true,
-          isSigner: false,
-        },
-        {
-          name: 'tokenAccount',
-          isMut: true,
-          isSigner: false,
-        },
-        {
-          name: 'tokenProgram',
-          isMut: false,
-          isSigner: false,
-        },
-        {
-          name: 'tokenMetadataProgram',
-          isMut: false,
-          isSigner: false,
-        },
-        {
-          name: 'payer',
-          isMut: true,
-          isSigner: false,
-        },
-        {
-          name: 'rent',
-          isMut: false,
-          isSigner: false,
-        },
-        {
-          name: 'systemProgram',
-          isMut: false,
-          isSigner: false,
-        },
-      ],
-      args: [
-        {
-          name: 'mintArgs',
-          type: {
-            defined: 'MintArgs',
           },
         },
       ],
@@ -1023,6 +1204,10 @@ export const IDL: RetripJs = {
           {
             name: 'typeName',
             type: 'string',
+          },
+          {
+            name: 'royalty',
+            type: 'u16',
           },
         ],
       },
@@ -1181,6 +1366,11 @@ export const IDL: RetripJs = {
         },
         {
           name: 'userTokenAccount',
+          type: 'string',
+          index: false,
+        },
+        {
+          name: 'userNftTokenAccount',
           type: 'string',
           index: false,
         },

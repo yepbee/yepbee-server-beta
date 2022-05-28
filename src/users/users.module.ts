@@ -7,13 +7,21 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Verification } from './entities/verification.entity';
 import { ValidProperty } from './entities/validProperty.entity';
+import { UserTokenAccounts } from './entities/userTokenAccounts.entity';
 
 @Module({})
 export class UsersModule {
   static forRoot(options: UsersModuleOptions = { test: '' }): DynamicModule {
     return {
       module: UsersModule,
-      imports: [TypeOrmModule.forFeature([User, Verification, ValidProperty])],
+      imports: [
+        TypeOrmModule.forFeature([
+          User,
+          Verification,
+          ValidProperty,
+          UserTokenAccounts,
+        ]),
+      ],
       providers: [
         {
           provide: KEY_OPTIONS,

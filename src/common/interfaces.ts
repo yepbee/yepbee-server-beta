@@ -2,6 +2,7 @@ import { HttpStatus } from '@nestjs/common';
 import { web3 } from '@retrip/js';
 import { CancelableRequest, Response } from 'got';
 import internal from 'stream';
+import { contentTypes } from './constants';
 import { throwException } from './functions';
 export * as web3 from '@solana/web3.js';
 
@@ -74,3 +75,7 @@ export class GlobalOptions {
 }
 
 export type Cluster = web3.Cluster;
+
+export type ContentType = keyof ContentTypes;
+
+export type ContentTypes = typeof contentTypes;

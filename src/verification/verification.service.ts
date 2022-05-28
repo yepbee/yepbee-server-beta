@@ -15,10 +15,14 @@ export class VerificationService {
     arr: EnqueueValidatingData[],
   ): Promise<{ h3: string; unixTime: number }[]> | never {
     const result = [];
-    for await (const [idx, { h3, rtime }] of arr.entries()) {
-      const one = await this.rtimeEntityRepository.findOneBy({
-        rtimeId: RtimeId.Walking,
-        rtime,
+    console.log('-----', arr);
+    for (const [idx, { h3, rtime }] of arr.entries()) {
+      console.log('--------', idx, h3, rtime);
+      const one = await this.rtimeEntityRepository.findOne({
+        where: {
+          rtimeId: RtimeId.Walking,
+          rtime,
+        },
       });
       console.log(one);
       if (!one) throw new Error(`Unexpected RTime Found`);

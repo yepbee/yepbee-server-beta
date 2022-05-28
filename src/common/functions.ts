@@ -1,9 +1,10 @@
 export { nanoid } from 'nanoid';
 import { ExecutionContext, HttpException } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
-import { AnyObject, HeaderTokenType } from './interfaces';
+import { AnyObject, ContentType, HeaderTokenType } from './interfaces';
 import * as FormData from 'form-data';
 import { snakeCase } from 'snake-case';
+import { contentTypes } from './constants';
 
 /**
  *
@@ -71,4 +72,16 @@ export function objectKeysToObject<T extends Record<string, unknown>>(o: T) {
     result[k] = k;
   }
   return result;
+}
+
+export function isContentType(
+  s: string,
+  option?: {
+    omit: ContentType[];
+  },
+): s is ContentType {
+  const { omit = [] } = option || {};
+  return (
+    Object.keys(contentTypes).includes(s) && !omit.includes(s as ContentType)
+  );
 }

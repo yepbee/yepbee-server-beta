@@ -159,12 +159,12 @@ export class UsersService {
       );
     }
 
-    const tokenAccount = await this.web3Service.createUserTokenAccount(
+    const internalTokenAccounts = await this.web3Service.createUserTokenAccount(
       user.pubkey,
     );
     const validProperty = this.validPropertysRepository.create({
       paymentSignature,
-      internalTokenAccount: tokenAccount.toString(),
+      internalTokenAccounts,
     });
 
     user['validProperty'] = validProperty;
