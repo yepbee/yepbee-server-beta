@@ -49,7 +49,7 @@ export class MailService {
   // =======================================
   @AsyncTryCatch()
   async sendVerificationEmail(email: string, redirectUri: string) {
-    await this.sendEmail(email, 'Verify Your Email', Template.Verification, {
+    await this.sendEmail(email, 'Verify your email', Template.Verification, {
       username: email,
       uri: redirectUri,
     });

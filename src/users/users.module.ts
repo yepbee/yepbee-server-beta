@@ -8,6 +8,7 @@ import { User } from './entities/user.entity';
 import { Verification } from './entities/verification.entity';
 import { ValidProperty } from './entities/validProperty.entity';
 import { UserTokenAccounts } from './entities/userTokenAccounts.entity';
+import { Transactions } from './entities/transactions.entity';
 
 @Module({})
 export class UsersModule {
@@ -20,6 +21,7 @@ export class UsersModule {
           Verification,
           ValidProperty,
           UserTokenAccounts,
+          Transactions,
         ]),
       ],
       providers: [

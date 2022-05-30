@@ -29,7 +29,7 @@ export class EnqueueValidatingInput {
 }
 
 @ObjectType()
-export class EnqueueValidatingOutput extends CoreOutput<boolean> {
-  @ResField(() => Boolean)
-  ok?: boolean;
+export class EnqueueValidatingOutput extends CoreOutput<number> {
+  @ResField(() => Number)
+  ok?: number;
 }

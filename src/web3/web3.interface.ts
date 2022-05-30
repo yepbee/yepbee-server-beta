@@ -15,9 +15,6 @@ export type Web3ModuleOptions = {
 
 export type AccountAddresses = {
   mintPubkey: PublicKey;
-  nftMintPubkey: PublicKey;
-  metadataPubkey: PublicKey;
-  masterEditionPubkey: PublicKey;
   whiteListPubkey: PublicKey;
   totalSupplyPubkey: PublicKey;
 };
@@ -69,3 +66,8 @@ export type ArweaveURL = `https://arweave.net/${string}`;
 
 export type MintSymbol = 'rtb1';
 export type MintType = 'banner';
+
+export type MintingResult = {
+  txhash: string;
+  mintKey: PublicKey;
+};

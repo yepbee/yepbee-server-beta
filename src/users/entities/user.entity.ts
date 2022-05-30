@@ -5,6 +5,7 @@ import {
   JoinColumn,
   JoinTable,
   ManyToMany,
+  OneToMany,
   OneToOne,
 } from 'typeorm';
 import { CoreEntity } from 'src/common/entites';
@@ -20,8 +21,10 @@ import {
 import { nanoid } from 'nanoid';
 import { ValidProperty } from './validProperty.entity';
 import { RTIME_LENGTH } from 'src/rtime/rtime.constant';
+import { NftBanner } from 'src/validation/entities/nftBanner.entity';
+import { Transactions } from './transactions.entity';
 
-@InputType({ isAbstract: true })
+@InputType('UserInput')
 @ObjectType()
 @Entity()
 export class User extends CoreEntity {
@@ -67,6 +70,27 @@ export class User extends CoreEntity {
   @ManyToMany(() => User, (user) => user.followers, { onDelete: 'CASCADE' })
   @JoinTable({ inverseJoinColumn: { name: 'following' } })
   following: User[];
+
+  @Field(() => [NftBanner], { defaultValue: [] })
+  @ValidateNested({ each: true })
+  @OneToMany(() => NftBanner, (banner: NftBanner) => banner.creatorUser, {
+    cascade: ['insert', 'update'],
+  })
+  createdBanners: NftBanner[];
+
+  @Field(() => [NftBanner], { defaultValue: [] })
+  @ValidateNested({ each: true })
+  @OneToMany(() => NftBanner, (banner: NftBanner) => banner.ownerUser, {
+    cascade: ['insert', 'update'],
+  })
+  ownedBanners: NftBanner[];
+
+  @Field(() => [Transactions], { defaultValue: [] })
+  @ValidateNested({ each: true })
+  @OneToMany(() => Transactions, (tx: Transactions) => tx.owner, {
+    cascade: true,
+  })
+  transactions: Transactions[];
 
   @BeforeInsert()
   insertDefaultValues() {

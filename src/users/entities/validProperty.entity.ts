@@ -1,9 +1,10 @@
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, InputType, ObjectType } from '@nestjs/graphql';
 import { IsString, ValidateNested } from 'class-validator';
 import { PureEntity } from 'src/common/entites';
 import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 import { UserTokenAccounts } from './userTokenAccounts.entity';
 
+@InputType('ValidPropertyInput')
 @ObjectType()
 @Entity()
 export class ValidProperty extends PureEntity {

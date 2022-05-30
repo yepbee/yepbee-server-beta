@@ -22,14 +22,14 @@ export class AuthMiddleware implements NestMiddleware<Request, Response> {
 
     if (typeof authorization === 'string') {
       const [tokenType, tokenBody] = authorization.split(' ');
-      console.log(tokenType, tokenBody);
-      if (this.verifyToken(tokenType, tokenBody)) {
+      // console.log(tokenType, tokenBody);
+      if (tokenType && tokenBody && this.verifyToken(tokenType, tokenBody)) {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const [pubkey, _, rtime] = tokenBody.split('.');
-        console.log(pubkey, rtime);
+        // console.log(pubkey, rtime);
         req[KEY_RTIME] = rtime;
         req[KEY_PUBKEY] = pubkey;
-        console.log(req[KEY_PUBKEY]);
+        // console.log(req[KEY_PUBKEY]);
         if (pubkey) {
           req[KEY_USER] = await this.authService.findUserByPubkey(pubkey);
         }

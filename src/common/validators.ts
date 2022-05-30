@@ -12,7 +12,7 @@ export function IsWalletPublicKey(
         validate: (value): boolean => isWalletPublicKey(value),
         defaultMessage: buildMessage(
           (eachPrefix) =>
-            eachPrefix + '$property must be valid Solana Public key',
+            eachPrefix + '$property must be valid solana public key',
           validationOptions,
         ),
       },
@@ -31,7 +31,7 @@ export function IsH3Index(
       validator: {
         validate: (value): boolean => h3GetResolution(value) === resolution,
         defaultMessage: buildMessage(
-          (eachPrefix) => eachPrefix + '$property must be valid H3 index',
+          (eachPrefix) => eachPrefix + '$property must be valid h3 index',
           validationOptions,
         ),
       },

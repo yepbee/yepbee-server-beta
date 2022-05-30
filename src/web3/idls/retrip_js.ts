@@ -36,16 +36,6 @@ export type RetripJs = {
           isSigner: false;
         },
         {
-          name: 'nftMint';
-          isMut: true;
-          isSigner: false;
-        },
-        {
-          name: 'programNftTokenAccount';
-          isMut: true;
-          isSigner: false;
-        },
-        {
           name: 'whiteList';
           isMut: true;
           isSigner: true;
@@ -143,17 +133,7 @@ export type RetripJs = {
           isSigner: false;
         },
         {
-          name: 'nftMint';
-          isMut: true;
-          isSigner: false;
-        },
-        {
           name: 'programTokenAccount';
-          isMut: true;
-          isSigner: false;
-        },
-        {
-          name: 'programNftTokenAccount';
           isMut: true;
           isSigner: false;
         },
@@ -164,11 +144,6 @@ export type RetripJs = {
         },
         {
           name: 'userTokenAccount';
-          isMut: true;
-          isSigner: false;
-        },
-        {
-          name: 'userNftTokenAccount';
           isMut: true;
           isSigner: false;
         },
@@ -270,17 +245,7 @@ export type RetripJs = {
           isSigner: false;
         },
         {
-          name: 'programNftTokenAccount';
-          isMut: true;
-          isSigner: false;
-        },
-        {
-          name: 'fromPubkey';
-          isMut: true;
-          isSigner: false;
-        },
-        {
-          name: 'fromNftTokenAccount';
+          name: 'nftTokenAccount';
           isMut: true;
           isSigner: false;
         },
@@ -326,22 +291,12 @@ export type RetripJs = {
           isSigner: true;
         },
         {
-          name: 'toPubkey';
-          isMut: true;
-          isSigner: false;
-        },
-        {
           name: 'nftMint';
           isMut: true;
           isSigner: false;
         },
         {
-          name: 'programNftTokenAccount';
-          isMut: true;
-          isSigner: false;
-        },
-        {
-          name: 'toNftTokenAccount';
+          name: 'nftTokenAccount';
           isMut: true;
           isSigner: false;
         },
@@ -646,11 +601,6 @@ export type RetripJs = {
           index: false;
         },
         {
-          name: 'userNftTokenAccount';
-          type: 'string';
-          index: false;
-        },
-        {
           name: 'whitelist';
           type: 'string';
           index: false;
@@ -760,16 +710,6 @@ export const IDL: RetripJs = {
           isSigner: false,
         },
         {
-          name: 'nftMint',
-          isMut: true,
-          isSigner: false,
-        },
-        {
-          name: 'programNftTokenAccount',
-          isMut: true,
-          isSigner: false,
-        },
-        {
           name: 'whiteList',
           isMut: true,
           isSigner: true,
@@ -867,17 +807,7 @@ export const IDL: RetripJs = {
           isSigner: false,
         },
         {
-          name: 'nftMint',
-          isMut: true,
-          isSigner: false,
-        },
-        {
           name: 'programTokenAccount',
-          isMut: true,
-          isSigner: false,
-        },
-        {
-          name: 'programNftTokenAccount',
           isMut: true,
           isSigner: false,
         },
@@ -888,11 +818,6 @@ export const IDL: RetripJs = {
         },
         {
           name: 'userTokenAccount',
-          isMut: true,
-          isSigner: false,
-        },
-        {
-          name: 'userNftTokenAccount',
           isMut: true,
           isSigner: false,
         },
@@ -994,17 +919,7 @@ export const IDL: RetripJs = {
           isSigner: false,
         },
         {
-          name: 'programNftTokenAccount',
-          isMut: true,
-          isSigner: false,
-        },
-        {
-          name: 'fromPubkey',
-          isMut: true,
-          isSigner: false,
-        },
-        {
-          name: 'fromNftTokenAccount',
+          name: 'nftTokenAccount',
           isMut: true,
           isSigner: false,
         },
@@ -1050,22 +965,12 @@ export const IDL: RetripJs = {
           isSigner: true,
         },
         {
-          name: 'toPubkey',
-          isMut: true,
-          isSigner: false,
-        },
-        {
           name: 'nftMint',
           isMut: true,
           isSigner: false,
         },
         {
-          name: 'programNftTokenAccount',
-          isMut: true,
-          isSigner: false,
-        },
-        {
-          name: 'toNftTokenAccount',
+          name: 'nftTokenAccount',
           isMut: true,
           isSigner: false,
         },
@@ -1366,11 +1271,6 @@ export const IDL: RetripJs = {
         },
         {
           name: 'userTokenAccount',
-          type: 'string',
-          index: false,
-        },
-        {
-          name: 'userNftTokenAccount',
           type: 'string',
           index: false,
         },

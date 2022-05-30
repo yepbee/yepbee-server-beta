@@ -43,3 +43,7 @@ export const contentTypes = {
   'image/jpeg': '',
   'image/png': '',
 };
+
+export enum TokenSymbol {
+  rtb1,
+}

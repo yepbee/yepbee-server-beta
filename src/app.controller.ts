@@ -23,6 +23,12 @@ export class AppController {
     ]);
   }
 
+  // for the test purpose
+  // @Get('faucet')
+  // async faucet(): Promise<string> {
+  //   return this.web3Service.faucet();
+  // }
+
   @Get()
   home(): string {
     return this.appService.welcome();
