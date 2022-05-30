@@ -25,7 +25,7 @@ export class VerificationService {
         },
       });
       console.log(one);
-      if (!one) throw new Error(`Unexpected RTime Found`);
+      if (!one) throw new Error(`Unexpected rtime found`);
       result[idx] = { h3, unixTime: one.unixTime };
     }
     return result;

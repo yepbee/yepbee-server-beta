@@ -1,8 +1,18 @@
-import { ArgsType, Field, InputType, ObjectType } from '@nestjs/graphql';
+import {
+  ArgsType,
+  Field,
+  Float,
+  InputType,
+  ObjectType,
+  registerEnumType,
+} from '@nestjs/graphql';
 import { Type } from 'class-transformer';
 import {
   ArrayMaxSize,
   IsArray,
+  IsEnum,
+  IsLatitude,
+  IsLongitude,
   IsNumber,
   IsString,
   Length,
@@ -16,6 +26,9 @@ import { CoreOutput } from 'src/common/dtos';
 import { ResField } from 'src/common/result/result.decorator';
 import { FileUpload, GraphQLUpload } from 'graphql-upload';
 import { SERVICE_DESCRIPTION_LENGTH } from '../../common/constants';
+import { Weather } from '@retrip/js';
+
+registerEnumType(Weather, { name: 'Weather' });
 
 @InputType({ isAbstract: true })
 @ObjectType()
@@ -23,22 +36,22 @@ export class Tag {
   @Field(() => String)
   @IsString()
   @Length(2, SERVICE_TAG_LENGTH)
-  name: string;
+  value: string;
 }
 
 @InputType({ isAbstract: true })
 @ObjectType()
 export class LatLng {
-  @Field(() => Number)
-  @IsNumber()
+  @Field(() => Float)
+  @IsLatitude()
   latitude: number;
-  @Field(() => Number)
-  @IsNumber()
+  @Field(() => Float)
+  @IsLongitude()
   longitude: number;
 }
 
 @ArgsType()
-export class MintPhotoInput {
+export class MintBannerInput {
   @Field(() => GraphQLUpload)
   file: FileUpload;
 
@@ -47,7 +60,7 @@ export class MintPhotoInput {
   @Length(2, SERVICE_DESCRIPTION_LENGTH)
   description: string;
 
-  @Field(() => [Tag])
+  @Field(() => [Tag], { defaultValue: [] })
   @IsArray()
   @ArrayMaxSize(SERVICE_TAGS_MAX_SIZE)
   @ValidateNested({ each: true })
@@ -55,11 +68,21 @@ export class MintPhotoInput {
   tags: Tag[];
 
   @Field(() => LatLng)
+  @ValidateNested()
+  @Type(() => LatLng)
   location: LatLng;
+
+  @Field(() => Weather)
+  @IsEnum(Weather)
+  weather: Weather;
+
+  @Field(() => Float)
+  @IsNumber()
+  temperatureCel: number;
 }
 
 @ObjectType()
-export class MintPhotoOutput extends CoreOutput<boolean> {
+export class MintBannerOutput extends CoreOutput<boolean> {
   @ResField(() => Boolean)
   ok?: boolean;
 }

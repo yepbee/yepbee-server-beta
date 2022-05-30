@@ -20,7 +20,7 @@ export class RtimeService {
   }
   static passRtimeId(id: any): void | never {
     if (!id || !RtimeService.isRtimeId(id))
-      throwException('Unexpected Rtime Id', HttpStatus.BAD_REQUEST);
+      throwException('Unexpected rtime id', HttpStatus.BAD_REQUEST);
   }
 
   constructor(
@@ -33,7 +33,7 @@ export class RtimeService {
         this.rtimes[id] = Rtime.new(interval);
         this.uncheckedSaveTime(id);
       } else {
-        throw new Error(`Unexpected Rtime Id: ${id}`);
+        throw new Error(`Unexpected rtime id: ${id}`);
       }
     }
   }

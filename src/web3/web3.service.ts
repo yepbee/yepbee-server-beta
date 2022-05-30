@@ -1,12 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 import {
   ARWEAVE_BASE_URL,
+  createNftMint,
   findUserTokenAccount,
   getMasterEditionAddress,
   getMetadataAddress,
   getProgramTokenAccount,
   MINT_ADDRESS,
-  NFT_MINT_ADDRESS,
   PROGRAM_ID,
   PublicKey,
   TOKEN_METADATA_PROGRAM_ID,
@@ -17,6 +17,7 @@ import { KEY_OPTIONS, web3 } from 'src/common/constants';
 import {
   AccountAddresses,
   ArweaveURL,
+  MintingResult,
   MintSymbol,
   MintType,
   Suggestion,
@@ -36,29 +37,19 @@ import { UserTokenAccounts } from 'src/users/entities/userTokenAccounts.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import Bundlr from '@bundlr-network/client';
-import { ContentType, Result } from 'src/common/interfaces';
-import { AsyncTryCatch } from 'src/common/decorators';
-import { Err, Ok } from 'src/common/result/result.function';
-
+import { ContentType } from 'src/common/interfaces';
 @Injectable()
 export class Web3Service {
   private readonly accountAddresses: AccountAddresses = {
     mintPubkey: new PublicKey(MINT_ADDRESS),
-    nftMintPubkey: new PublicKey(NFT_MINT_ADDRESS),
-    metadataPubkey: getMetadataAddress(), // <- NFT_MINT_ADDRESS
-    masterEditionPubkey: getMasterEditionAddress(), // <- NFT_MINT_ADDRESS
     whiteListPubkey: new PublicKey(WHITELIST_ADDRESS),
     totalSupplyPubkey: new PublicKey(TOTALSUPPLY_ADDRESS),
   };
   private readonly programTokenAccount: PublicKey = getProgramTokenAccount()[0];
-  private readonly programNftTokenAccount: PublicKey = getProgramTokenAccount(
-    new PublicKey(NFT_MINT_ADDRESS),
-  )[0];
   private readonly connection: web3.Connection;
   private readonly keypair: web3.Keypair;
   readonly masterPubkey: PublicKey;
   readonly masterTokenAccount: PublicKey;
-  readonly masterNftTokenAccount: PublicKey;
   readonly program: Program<RetripJs>;
   private readonly bundlr: Bundlr;
   constructor(
@@ -77,20 +68,14 @@ export class Web3Service {
       this.masterPubkey,
       this.masterPubkey,
     )[0];
-    this.masterNftTokenAccount = findUserTokenAccount(
-      this.masterPubkey,
-      this.masterPubkey,
-      this.accountAddresses.nftMintPubkey,
-    )[0];
 
     this.program = new Program<RetripJs>(
       IDL,
       PROGRAM_ID,
-      new AnchorProvider(
-        this.connection,
-        new Wallet(this.keypair),
-        AnchorProvider.defaultOptions(),
-      ),
+      new AnchorProvider(this.connection, new Wallet(this.keypair), {
+        ...AnchorProvider.defaultOptions(),
+        commitment: 'finalized',
+      }),
     );
 
     this.bundlr = new Bundlr(
@@ -134,6 +119,14 @@ export class Web3Service {
     const { commitment = 'finalized' } = options || {};
     return this.connection.getParsedTransaction(signature, commitment);
   }
+  async findNftTokenAccount(pubkey: PublicKey): Promise<PublicKey> {
+    const { nftTokenAccount } = await createNftMint(
+      this.connection,
+      pubkey,
+      this.keypair,
+    );
+    return nftTokenAccount;
+  }
   async createUserTokenAccount(
     userPubkey: PublicKey | string,
   ): Promise<UserTokenAccounts> {
@@ -142,31 +135,22 @@ export class Web3Service {
       userPubkey as PublicKey,
       this.masterPubkey,
     )[0];
-    const userNftTokenAccount: PublicKey = findUserTokenAccount(
-      userPubkey as PublicKey,
-      this.masterPubkey,
-      this.accountAddresses.nftMintPubkey,
-    )[0];
     await this.program.methods
       .createUser()
       .accounts({
-        whiteList: this.accountAddresses.whiteListPubkey,
         payer: this.masterPubkey,
         userPubkey: userPubkey as PublicKey,
+        whiteList: this.accountAddresses.whiteListPubkey,
         tokenProgram: TOKEN_PROGRAM_ID,
         rent: SYSVAR_RENT_PUBKEY,
         mint: this.accountAddresses.mintPubkey,
-        nftMint: this.accountAddresses.nftMintPubkey,
         programTokenAccount: this.programTokenAccount,
-        programNftTokenAccount: this.programNftTokenAccount,
         userTokenAccount,
-        userNftTokenAccount,
       })
       .signers([this.keypair])
       .rpc();
     return this.userTokenAccountssRepository.create({
       tokenAccount: userTokenAccount.toString(),
-      nftTokenAccount: userNftTokenAccount.toString(),
     });
   }
 
@@ -187,29 +171,29 @@ export class Web3Service {
     await tx.sign();
     console.log('uploading...');
     const { status } = (await tx.upload()) || {};
-    if (status === 200) {
+    if (status !== 200) {
       throw new Error(`failed! code: ${status}`);
     }
     console.log('succeed!');
     return tx.id;
   }
 
-  mintNFT(
+  async mintNFT(
     creatorPubkey: PublicKey,
-    creatorNftTokenAccount: PublicKey, // * unchecked
     metadataUri: string,
     name: string,
     symbol: MintSymbol,
     typeName: MintType,
     royalty = 5,
-  ): Promise<string> {
-    // creatorKey: creatorPubkey,
-    // metadataUri: metadataUrl,
-    // name: `banner-v${bannerVersion}-${bannerCount}-${h3Position}:${h3Resolution}`,
-    // symbol: 'rtb1',
-    // typeName: 'banner',
-    // royalty: 5,
-    return this.program.methods
+  ): Promise<MintingResult> {
+    const { nftMint, nftTokenAccount } = await createNftMint(
+      this.connection,
+      creatorPubkey,
+      this.keypair,
+    );
+    const metadata = getMetadataAddress(nftMint); // <- NFT_MINT_ADDRESS
+    const masterEdition = getMasterEditionAddress(nftMint); // <- NFT_MINT_ADDRESS
+    const txhash = await this.program.methods
       .mintNftAsWhitelist({
         creatorKey: creatorPubkey,
         metadataUri,
@@ -225,15 +209,14 @@ export class Web3Service {
         whiteList: this.accountAddresses.whiteListPubkey,
         totalSupply: this.accountAddresses.totalSupplyPubkey,
         payer: this.masterPubkey,
-        toPubkey: creatorPubkey,
-        toNftTokenAccount: creatorNftTokenAccount,
-        nftMint: this.accountAddresses.nftMintPubkey,
-        programNftTokenAccount: this.programNftTokenAccount,
-        metadata: this.accountAddresses.metadataPubkey,
-        masterEdition: this.accountAddresses.masterEditionPubkey,
+        nftMint,
+        nftTokenAccount,
+        metadata,
+        masterEdition,
       })
       .signers([this.keypair])
       .rpc();
+    return { txhash, mintKey: nftMint };
   }
   /**
    *
@@ -252,38 +235,38 @@ export class Web3Service {
     return this.program.methods
       .transferSystemToken(new anchor.BN(amount))
       .accounts({
-        rent: SYSVAR_RENT_PUBKEY,
-        tokenProgram: TOKEN_PROGRAM_ID,
-        mint: this.accountAddresses.mintPubkey,
         whiteList: this.accountAddresses.whiteListPubkey,
+        payer: this.masterPubkey,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        rent: SYSVAR_RENT_PUBKEY,
+        mint: this.accountAddresses.mintPubkey,
+        programTokenAccount: this.programTokenAccount,
         fromPubkey,
         fromTokenAccount: fromTA,
         toTokenAccount: toTA,
-        programTokenAccount: getProgramTokenAccount(),
-        payer: this.masterPubkey,
       })
       .signers([this.keypair])
       .rpc();
   }
-  transferSystemNftToken(
+  async transferSystemNftToken(
     toNFTTA: PublicKey,
     fromPubkey: PublicKey = this.masterPubkey,
-    fromNFTTA: PublicKey = this.masterNftTokenAccount,
   ): Promise<string> {
+    const { nftMint, nftTokenAccount } = await createNftMint(
+      this.connection,
+      fromPubkey,
+      this.keypair,
+    );
     return this.program.methods
       .transferSystemNftToken()
       .accounts({
         rent: SYSVAR_RENT_PUBKEY,
         tokenProgram: TOKEN_PROGRAM_ID,
-        nftMint: this.accountAddresses.nftMintPubkey,
         whiteList: this.accountAddresses.whiteListPubkey,
-        fromPubkey,
-        fromNftTokenAccount: fromNFTTA,
-        toNftTokenAccount: toNFTTA,
-        programNftTokenAccount: getProgramTokenAccount(
-          this.accountAddresses.nftMintPubkey,
-        ),
         payer: this.masterPubkey,
+        nftMint,
+        nftTokenAccount,
+        toNftTokenAccount: toNFTTA,
       })
       .signers([this.keypair])
       .rpc();
@@ -294,6 +277,22 @@ export class Web3Service {
       .accounts({
         whiteList: this.accountAddresses.whiteListPubkey,
       })
+      .rpc();
+  }
+  // for test
+  faucet() {
+    return this.program.methods
+      .faucet()
+      .accounts({
+        whiteList: this.accountAddresses.whiteListPubkey,
+        payer: this.masterPubkey,
+        payerTokenAccount: this.masterTokenAccount,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        rent: SYSVAR_RENT_PUBKEY,
+        mint: this.accountAddresses.mintPubkey,
+        programTokenAccount: this.programTokenAccount,
+      })
+      .signers([this.keypair])
       .rpc();
   }
 }

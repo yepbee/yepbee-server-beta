@@ -53,6 +53,8 @@ export class EnvModule {
       VALIDATOR_TIME_DISTANCE_MAX_BOUNDARY: '',
       VALIDATOR_MAX_ONEDAY_REWARDS: '',
       SERVICE_MEMBERSHIP_FEE: '',
+      SERVICE_RTRP_PER_HONEYCON: '',
+      SERVICE_RTRP_PER_MINTING_BANNER: '',
     });
 
   static getConfig = () => ({

@@ -3,6 +3,13 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { graphqlUploadExpress } from 'graphql-upload';
 import { GLOBAL_OPTIONS, DEFAULT_PORT } from './common/constants';
+import * as crypto from 'crypto';
+
+Object.defineProperty(global, 'crypto', {
+  value: {
+    getRandomValues: (arr: any[]) => crypto.randomBytes(arr.length),
+  },
+});
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

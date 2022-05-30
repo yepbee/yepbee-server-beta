@@ -24,6 +24,9 @@ import { VerificationModule } from './verification/verification.module';
 import { ValidationModule } from './validation/validation.module';
 import { ValidProperty } from './users/entities/validProperty.entity';
 import { UserTokenAccounts } from './users/entities/userTokenAccounts.entity';
+import { InventoryModule } from './inventory/inventory.module';
+import { NftBanner } from './validation/entities/nftBanner.entity';
+import { BannerTag } from './validation/entities/bannerTag.entity';
 
 @Module({
   imports: [
@@ -43,6 +46,8 @@ import { UserTokenAccounts } from './users/entities/userTokenAccounts.entity';
       // dropSchema: _.isNotProduction,
     }),
     TypeOrmModule.forFeature([
+      BannerTag,
+      NftBanner,
       UserTokenAccounts,
       ValidProperty,
       Verification,
@@ -91,7 +96,11 @@ import { UserTokenAccounts } from './users/entities/userTokenAccounts.entity';
       timeDistanceMinBoundary: +_.ENVS.VALIDATOR_TIME_DISTANCE_MIN_BOUNDARY,
       timeDistanceMaxBoundary: +_.ENVS.VALIDATOR_TIME_DISTANCE_MAX_BOUNDARY,
       rewardsOnedayMax: +_.ENVS.VALIDATOR_MAX_ONEDAY_REWARDS,
+      h3MintingResolution: +_.ENVS.H3_MINTING_RESOLUTION,
+      rtrpPerHoneycon: +_.ENVS.SERVICE_RTRP_PER_HONEYCON,
+      rtrpPerMintingBanner: +_.ENVS.SERVICE_RTRP_PER_MINTING_BANNER,
     }),
+    InventoryModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [AppService],

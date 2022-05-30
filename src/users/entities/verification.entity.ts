@@ -1,9 +1,10 @@
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, InputType, ObjectType } from '@nestjs/graphql';
 import { IsEmail, IsString, Length } from 'class-validator';
 import { PureEntity } from 'src/common/entites';
 import { IsWalletPublicKey } from 'src/common/validators';
 import { Column, Entity } from 'typeorm';
 
+@InputType('VerificationInput')
 @ObjectType()
 @Entity()
 export class Verification extends PureEntity {

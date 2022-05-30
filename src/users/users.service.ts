@@ -20,6 +20,7 @@ import { ValidProperty } from './entities/validProperty.entity';
 
 @Injectable()
 export class UsersService {
+  private readonly membershipFeeStr: string;
   constructor(
     private readonly envService: EnvService,
     @InjectRepository(User) private readonly usersRepository: Repository<User>,
@@ -30,7 +31,9 @@ export class UsersService {
     private readonly mailService: MailService,
     private readonly rtimeService: RtimeService,
     private readonly web3Service: Web3Service,
-  ) {}
+  ) {
+    this.membershipFeeStr = this.envService.get('SERVICE_MEMBERSHIP_FEE');
+  }
 
   @AsyncTryCatch()
   async editProfile(
@@ -99,7 +102,7 @@ export class UsersService {
     { paymentSignature }: SignupChainUserInput,
     user: User,
   ): Promise<SignupChainUserOutput> {
-    if (user.validProperty) return Err(`User Already Signed`);
+    if (user.validProperty) return Err(`User already signed`);
 
     // get transaction
     const { transaction: { message } = {} } =
@@ -134,11 +137,11 @@ export class UsersService {
       );
     }
 
-    if (lamports.toString() !== this.envService.get('SERVICE_MEMBERSHIP_FEE')) {
+    if (lamports.toString() !== this.membershipFeeStr) {
       return Err(
-        `Unexpected Amount Value : ${lamports.toString()} (expected ${this.envService.get(
-          'SERVICE_MEMBERSHIP_FEE',
-        )})`,
+        `Unexpected amount value : ${lamports.toString()} (expected ${
+          this.membershipFeeStr
+        })`,
       );
     }
 
@@ -146,7 +149,7 @@ export class UsersService {
 
     if (sender !== user.pubkey) {
       return Err(
-        `Unexpected Sender Public Key : ${sender} (expected ${user.pubkey})`,
+        `Unexpected sender public key : ${sender} (expected ${user.pubkey})`,
       );
     }
 
@@ -155,7 +158,7 @@ export class UsersService {
 
     if (receiver !== masterPubkey) {
       return Err(
-        `Unexpected Receiver Public Key : ${receiver} (expected ${masterPubkey})`,
+        `Unexpected receiver public key : ${receiver} (expected ${masterPubkey})`,
       );
     }
 

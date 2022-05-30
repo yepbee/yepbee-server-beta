@@ -1,4 +1,9 @@
-import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
+import {
+  Field,
+  InputType,
+  ObjectType,
+  registerEnumType,
+} from '@nestjs/graphql';
 import { IsEnum, IsString } from 'class-validator';
 import { PureEntity } from 'src/common/entites';
 import { Column, Entity } from 'typeorm';
@@ -12,6 +17,7 @@ enum TransactionType {
 
 registerEnumType(TransactionType, { name: 'TransactionType' });
 
+@InputType('TransactionsInput')
 @ObjectType()
 @Entity()
 export class Transactions extends PureEntity {
@@ -20,7 +26,7 @@ export class Transactions extends PureEntity {
   @IsEnum(TransactionType)
   type: TransactionType;
   @Field(() => String)
-  @IsString()
+  @IsString() // * unchecked
   @Column({ unique: true })
   txhash: string;
 }
