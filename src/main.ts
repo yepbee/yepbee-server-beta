@@ -18,7 +18,7 @@ async function bootstrap() {
   // file receiver
   app.use(graphqlUploadExpress({ maxFieldSize: 8 * 1000 * 1000 }));
 
-  await app.listen(DEFAULT_PORT);
+  await app.listen(process.env['PORT'] || DEFAULT_PORT);
 
   GLOBAL_OPTIONS.set({
     baseUrl: await app.getUrl(),
