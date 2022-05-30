@@ -15,6 +15,8 @@ export class BannerTag extends CoreEntity {
   @Column()
   value: string;
 
-  @ManyToMany(() => NftBanner, (banner: NftBanner) => banner.tags)
+  @ManyToMany(() => NftBanner, (banner: NftBanner) => banner.tags, {
+    cascade: ['insert', 'update'],
+  })
   banner: NftBanner;
 }

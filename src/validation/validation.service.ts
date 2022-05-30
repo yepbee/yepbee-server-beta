@@ -27,6 +27,11 @@ import { NftBanner } from './entities/nftBanner.entity';
 import { Repository } from 'typeorm';
 import { BannerTag } from './entities/bannerTag.entity';
 import { MintingResult } from 'src/web3/web3.interface';
+import {
+  CurrencyType,
+  Transactions,
+  TransactionType,
+} from 'src/users/entities/transactions.entity';
 
 @Injectable()
 export class ValidationService {
@@ -49,6 +54,8 @@ export class ValidationService {
     private readonly nftBannersRepository: Repository<NftBanner>,
     @InjectRepository(BannerTag)
     private readonly bannerTagsRepository: Repository<BannerTag>,
+    @InjectRepository(Transactions)
+    private readonly transactionsRepository: Repository<Transactions>,
   ) {
     this.TD_MIN = this.options.timeDistanceMinBoundary;
     this.TD_MAX = this.options.timeDistanceMaxBoundary;
@@ -125,7 +132,7 @@ export class ValidationService {
     // location data can be modified as hacking
     // *****************
 
-    await this.web3Service.transferSystemToken(
+    const txhash = await this.web3Service.transferSystemToken(
       this.web3Service.masterTokenAccount,
       this.RTRP_PER_MINTING_BANNER,
       creatorPubkey,
@@ -223,6 +230,19 @@ export class ValidationService {
       throw e;
     }
 
+    console.log('recording the transaction...');
+    const tx = this.transactionsRepository.create({
+      owner: user,
+      currency: CurrencyType.RTRP,
+      txhash,
+      from: pubkey,
+      to: this.web3Service.masterPubkey.toString(),
+      amount: this.RTRP_PER_MINTING_BANNER,
+      type: TransactionType.Mint,
+    });
+
+    await this.transactionsRepository.save(tx);
+
     console.log('saving into our database..');
     const banner = this.nftBannersRepository.create({
       creatorUser: user,
@@ -290,8 +310,9 @@ export class ValidationService {
 
     if (rewards === 0) return Err(`0 reward`);
 
+    let txhash: string;
     try {
-      await this.web3Service.transferSystemToken(
+      txhash = await this.web3Service.transferSystemToken(
         this.web3Service.newPublicKey(tokenAccount),
         this.RTRP_PER_HONEYCON * rewards,
       );
@@ -300,7 +321,18 @@ export class ValidationService {
       throw e;
     }
 
-    // !TODO: push transaction history
+    console.log('recording the transaction...');
+    const tx = this.transactionsRepository.create({
+      owner: user,
+      currency: CurrencyType.RTRP,
+      txhash,
+      from: this.web3Service.masterPubkey.toString(),
+      to: user.pubkey,
+      amount: this.RTRP_PER_HONEYCON * rewards,
+      type: TransactionType.Reward,
+    });
+
+    await this.transactionsRepository.save(tx);
 
     return Ok(rewards);
   }

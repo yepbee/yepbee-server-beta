@@ -27,6 +27,7 @@ import { UserTokenAccounts } from './users/entities/userTokenAccounts.entity';
 import { InventoryModule } from './inventory/inventory.module';
 import { NftBanner } from './validation/entities/nftBanner.entity';
 import { BannerTag } from './validation/entities/bannerTag.entity';
+import { Transactions } from './users/entities/transactions.entity';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { BannerTag } from './validation/entities/bannerTag.entity';
       // dropSchema: _.isNotProduction,
     }),
     TypeOrmModule.forFeature([
+      Transactions,
       BannerTag,
       NftBanner,
       UserTokenAccounts,
@@ -100,7 +102,9 @@ import { BannerTag } from './validation/entities/bannerTag.entity';
       rtrpPerHoneycon: +_.ENVS.SERVICE_RTRP_PER_HONEYCON,
       rtrpPerMintingBanner: +_.ENVS.SERVICE_RTRP_PER_MINTING_BANNER,
     }),
-    InventoryModule.forRoot(),
+    InventoryModule.forRoot({
+      maxOutputLength: +_.ENVS.INVENTORY_MAX_OUTPUT_LENGTH,
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],

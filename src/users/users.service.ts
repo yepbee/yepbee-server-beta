@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AsyncTryCatch } from 'src/common/decorators';
 import { Err, Ok } from 'src/common/result/result.function';
@@ -8,7 +8,7 @@ import { User } from './entities/user.entity';
 import { MailService } from '../mail/mail.service';
 import { Verification } from './entities/verification.entity';
 import { EnvService } from 'src/env/env.service';
-import { bs58, GLOBAL_OPTIONS, RtimeId } from 'src/common/constants';
+import { bs58 } from 'src/common/constants';
 import { RtimeService } from 'src/rtime/rtime.service';
 import { EditProfileInput, EditProfileOutput } from './dtos/editProfile.dto';
 import {
@@ -17,6 +17,12 @@ import {
 } from './dtos/signupChainUser.dto';
 import { Web3Service } from 'src/web3/web3.service';
 import { ValidProperty } from './entities/validProperty.entity';
+import {
+  CurrencyType,
+  Transactions,
+  TransactionType,
+} from './entities/transactions.entity';
+import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 
 @Injectable()
 export class UsersService {
@@ -28,6 +34,8 @@ export class UsersService {
     private readonly verificationsRepository: Repository<Verification>,
     @InjectRepository(ValidProperty)
     private readonly validPropertysRepository: Repository<ValidProperty>,
+    @InjectRepository(Transactions)
+    private readonly transactionsRepository: Repository<Transactions>,
     private readonly mailService: MailService,
     private readonly rtimeService: RtimeService,
     private readonly web3Service: Web3Service,
@@ -169,10 +177,21 @@ export class UsersService {
       paymentSignature,
       internalTokenAccounts,
     });
-
     user['validProperty'] = validProperty;
 
     await this.usersRepository.save(user);
+
+    const genesisTx = this.transactionsRepository.create({
+      owner: user,
+      currency: CurrencyType.Sol,
+      txhash: paymentSignature,
+      from: sender,
+      to: receiver,
+      amount: +this.membershipFeeStr / LAMPORTS_PER_SOL,
+      type: TransactionType.System,
+    });
+
+    await this.transactionsRepository.save(genesisTx);
 
     return Ok(true);
   }

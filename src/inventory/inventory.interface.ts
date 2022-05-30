@@ -1,3 +1,3 @@
 export type InventoryModuleOptions = {
-  test: string;
+  maxOutputLength: number;
 };

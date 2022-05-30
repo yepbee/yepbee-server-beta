@@ -22,6 +22,7 @@ import { nanoid } from 'nanoid';
 import { ValidProperty } from './validProperty.entity';
 import { RTIME_LENGTH } from 'src/rtime/rtime.constant';
 import { NftBanner } from 'src/validation/entities/nftBanner.entity';
+import { Transactions } from './transactions.entity';
 
 @InputType('UserInput')
 @ObjectType()
@@ -83,6 +84,13 @@ export class User extends CoreEntity {
     cascade: ['insert', 'update'],
   })
   ownedBanners: NftBanner[];
+
+  @Field(() => [Transactions], { defaultValue: [] })
+  @ValidateNested({ each: true })
+  @OneToMany(() => Transactions, (tx: Transactions) => tx.owner, {
+    cascade: true,
+  })
+  transactions: Transactions[];
 
   @BeforeInsert()
   insertDefaultValues() {
