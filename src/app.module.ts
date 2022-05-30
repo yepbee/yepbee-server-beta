@@ -17,7 +17,13 @@ import { RtimeModule } from './rtime/rtime.module';
 import { UsersModule } from './users/users.module';
 import { User } from './users/entities/user.entity';
 import { AuthMiddleware } from './auth/auth.middleware';
-import { KEY_PUBKEY, KEY_RTIME, KEY_USER, RtimeId } from './common/constants';
+import {
+  KEY_DATABASE_URL,
+  KEY_PUBKEY,
+  KEY_RTIME,
+  KEY_USER,
+  RtimeId,
+} from './common/constants';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { Verification } from './users/entities/verification.entity';
 import { VerificationModule } from './verification/verification.module';
@@ -36,12 +42,11 @@ import { Transactions } from './users/entities/transactions.entity';
     /* PostgreSQL */
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: _.ENVS.DB_HOST,
-      port: +_.ENVS.DB_PORT,
-      username: _.ENVS.DB_USERNAME,
-      password: _.ENVS.DB_PASSWORD,
-      database: _.ENVS.DB_NAME,
-      synchronize: _.isNotProduction,
+      url: process.env[KEY_DATABASE_URL]
+        ? process.env[KEY_DATABASE_URL]
+        : `postgres://${_.ENVS.DB_USERNAME}:${_.ENVS.DB_PASSWORD}@${_.ENVS.DB_HOST}:${_.ENVS.DB_PORT}/${_.ENVS.DB_NAME}`,
+
+      synchronize: true, // _.isNotProduction,
       logging: _.isNotProduction,
       autoLoadEntities: true,
       // dropSchema: _.isNotProduction,
