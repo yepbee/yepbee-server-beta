@@ -46,7 +46,7 @@ import { Transactions } from './users/entities/transactions.entity';
         ? process.env[KEY_DATABASE_URL]
         : `postgres://${_.ENVS.DB_USERNAME}:${_.ENVS.DB_PASSWORD}@${_.ENVS.DB_HOST}:${_.ENVS.DB_PORT}/${_.ENVS.DB_NAME}`,
 
-      synchronize: _.isNotProduction,
+      synchronize: true, // _.isNotProduction,
       logging: _.isNotProduction,
       autoLoadEntities: true,
       // dropSchema: _.isNotProduction,
