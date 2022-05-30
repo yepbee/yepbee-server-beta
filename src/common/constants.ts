@@ -16,6 +16,8 @@ export const DEFAULT_PORT = 8000;
 
 export const GLOBAL_OPTIONS = new GlobalOptions();
 
+export const KEY_DATABASE_URL = 'DATABASE_URL';
+
 export const KEY_OPTIONS = 'options';
 
 export const KEY_PUBKEY = 'pubkey';
