@@ -1701,10 +1701,10 @@
   dependencies:
     "@randlabs/communication-bridge" "^1.0.0"
 
-"@retrip/js@^0.0.39":
-  version "0.0.39"
-  resolved "https://registry.yarnpkg.com/@retrip/js/-/js-0.0.39.tgz#95ef4f6c7bedd4ee0ba60cbd24739af419d775fc"
-  integrity sha512-igsHZBkSGFFVGv3g4Qw2pN0xGRkcxFd/6DT8yWcK2asICIbHuoQLx84yGFgSV3ZemKM9SO3ZjFs22Xeo6w3fHw==
+"@retrip/js@^0.0.40":
+  version "0.0.40"
+  resolved "https://registry.yarnpkg.com/@retrip/js/-/js-0.0.40.tgz#7fbb4c5ee193820eff7c7464b38436f0dfc2c3bd"
+  integrity sha512-4FOB5olPwGXPkzfp7f5Cdux8sR1zResc7M7WlBSJ4iaa3DOUv1XXceZgFDpbcymgxR5T+6wZsGopaJgu1EMl8g==
   dependencies:
     "@project-serum/anchor" "^0.24.2"
     "@solana/spl-token" "^0.2.0"
@@ -4634,6 +4634,23 @@ got@11.8.3:
   version "11.8.3"
   resolved "https://registry.yarnpkg.com/got/-/got-11.8.3.tgz#f496c8fdda5d729a90b4905d2b07dbd148170770"
   integrity sha512-7gtQ5KiPh1RtGS9/Jbv1ofDpBFuq42gyfEib+ejaRBJuj/3tQFeR5+gw57e4ipaU8c/rCjvX6fkQz2lyDlGAOg==
+  dependencies:
+    "@sindresorhus/is" "^4.0.0"
+    "@szmarczak/http-timer" "^4.0.5"
+    "@types/cacheable-request" "^6.0.1"
+    "@types/responselike" "^1.0.0"
+    cacheable-lookup "^5.0.3"
+    cacheable-request "^7.0.2"
+    decompress-response "^6.0.0"
+    http2-wrapper "^1.0.0-beta.5.2"
+    lowercase-keys "^2.0.0"
+    p-cancelable "^2.0.0"
+    responselike "^2.0.0"
+
+got@11.8.5:
+  version "11.8.5"
+  resolved "https://registry.yarnpkg.com/got/-/got-11.8.5.tgz#ce77d045136de56e8f024bebb82ea349bc730046"
+  integrity sha512-o0Je4NvQObAuZPHLFoRSkdG2lTgtcynqymzg2Vupdx6PorhaT5MCbIyXG6d4D94kk8ZG57QeosgdiqfJWhEhlQ==
   dependencies:
     "@sindresorhus/is" "^4.0.0"
     "@szmarczak/http-timer" "^4.0.5"
