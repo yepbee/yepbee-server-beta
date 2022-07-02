@@ -1,12 +1,10 @@
-import { DynamicModule, Module } from '@nestjs/common';
+import { DynamicModule, Global, Module } from '@nestjs/common';
 import { KEY_OPTIONS } from 'src/common/constants';
 import { TokenModuleOptions } from './token.interface';
-import { TokenResolver } from './token.resolver';
 import { TokenService } from './token.service';
 
-@Module({
-  providers: [TokenResolver, TokenService],
-})
+@Global()
+@Module({})
 export class TokenModule {
   static forRoot(options: TokenModuleOptions = { test: '' }): DynamicModule {
     return {

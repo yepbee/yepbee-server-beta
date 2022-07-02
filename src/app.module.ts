@@ -14,6 +14,7 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { AuthModule } from './auth/auth.module';
 import { EnvModule as _ } from './env/env.module';
 import { RtimeModule } from './rtime/rtime.module';
+import { TokenModule } from './token/token.module';
 import { UsersModule } from './users/users.module';
 import { User } from './users/entities/user.entity';
 import { AuthMiddleware } from './auth/auth.middleware';
@@ -86,6 +87,7 @@ import { Transactions } from './users/entities/transactions.entity';
       },
       preservedTime: +_.ENVS.RTIME_DATABASE_PRESERVED_TIME,
     }),
+    TokenModule.forRoot(),
     UsersModule.forRoot(),
     AuthModule.forRoot(),
     Web3Module.forRoot({

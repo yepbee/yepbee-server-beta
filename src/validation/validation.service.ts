@@ -129,7 +129,7 @@ export class ValidationService {
     const h3 = geoToH3(latitude, longitude, this.MINTING_RESOLUTION);
 
     // **** WARNING ****
-    // location data can be modified as hacking
+    // location data can be modified by hacking
     // *****************
 
     const txhash = await this.web3Service.transferSystemToken(
@@ -267,6 +267,7 @@ export class ValidationService {
     return Ok(true);
   }
 
+  // 요청 전달 최소 양 넣기
   @AsyncTryCatch()
   async enqueueValidating(
     user: User,
@@ -331,6 +332,10 @@ export class ValidationService {
       amount: this.RTRP_PER_HONEYCON * rewards,
       type: TransactionType.Reward,
     });
+
+    // tx.createdAt  <--- need to work 1 month period clearing
+    // 솔라나 가격이 오를 경우 무브 보상량을 줄여서 유통량을 줄여 요청량을 줄일 것인지
+    // 민팅 가격 자체를 올려 요청량을 줄일 것인지
 
     await this.transactionsRepository.save(tx);
 
