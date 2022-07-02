@@ -1,10 +1,4 @@
-import {
-  Field,
-  Float,
-  InputType,
-  ObjectType,
-  registerEnumType,
-} from '@nestjs/graphql';
+import { Field, Float, InputType, ObjectType } from '@nestjs/graphql';
 import { Weather } from '@retrip/js';
 import { Type } from 'class-transformer';
 import {
@@ -38,9 +32,6 @@ import {
   ManyToOne,
 } from 'typeorm';
 import { BannerTag } from './bannerTag.entity';
-
-registerEnumType(TokenSymbol, { name: 'TokenSymbol' });
-registerEnumType(Weather, { name: 'Weather' });
 
 @InputType('NftBannerInput')
 @ObjectType()

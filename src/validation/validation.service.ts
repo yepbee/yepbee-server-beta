@@ -1,5 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { contentTypes, KEY_OPTIONS, TokenSymbol } from 'src/common/constants';
+import {
+  contentTypes,
+  CurrencyType,
+  KEY_OPTIONS,
+  TokenSymbol,
+  TransactionType,
+} from 'src/common/constants';
 import { AsyncTryCatch } from 'src/common/decorators';
 import { Err, Ok } from 'src/common/result/result.function';
 import { User } from 'src/users/entities/user.entity';
@@ -27,11 +33,7 @@ import { NftBanner } from './entities/nftBanner.entity';
 import { Repository } from 'typeorm';
 import { BannerTag } from './entities/bannerTag.entity';
 import { MintingResult } from 'src/web3/web3.interface';
-import {
-  CurrencyType,
-  Transactions,
-  TransactionType,
-} from 'src/users/entities/transactions.entity';
+import { Transactions } from 'src/users/entities/transactions.entity';
 
 @Injectable()
 export class ValidationService {

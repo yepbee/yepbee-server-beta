@@ -2,6 +2,8 @@ import { GlobalOptions } from './interfaces';
 
 export * as web3 from '@solana/web3.js';
 import * as bs58 from 'bs58';
+import { registerEnumType } from '@nestjs/graphql';
+import { Weather } from '@retrip/js';
 export { bs58 };
 
 export const SERVICE_DESCRIPTION_LENGTH = 2200;
@@ -28,6 +30,12 @@ export const KEY_USER = 'user';
 
 export const KEY_ROLES = 'roles';
 
+export const contentTypes = {
+  'application/json': '',
+  'image/jpeg': '',
+  'image/png': '',
+};
+
 export enum AuthRole {
   Unknown = 'Unknown', // has no pubkey
   Guest = 'Guest', // not yet signed
@@ -40,12 +48,25 @@ export enum RtimeId {
   Walking = 'Walking',
 }
 
-export const contentTypes = {
-  'application/json': '',
-  'image/jpeg': '',
-  'image/png': '',
-};
-
 export enum TokenSymbol {
   rtb1,
 }
+
+export enum CurrencyType {
+  Sol,
+  RTRP,
+}
+
+export enum TransactionType {
+  Reward,
+  Mint,
+  Withdraw,
+  System,
+  Unknown,
+}
+
+registerEnumType(RtimeId, { name: 'RtimeId' });
+registerEnumType(Weather, { name: 'Weather' });
+registerEnumType(TokenSymbol, { name: 'TokenSymbol' });
+registerEnumType(CurrencyType, { name: 'CurrencyType' });
+registerEnumType(TransactionType, { name: 'TransactionType' });

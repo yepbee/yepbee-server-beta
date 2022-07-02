@@ -1,11 +1,4 @@
-import {
-  ArgsType,
-  Field,
-  Float,
-  InputType,
-  ObjectType,
-  registerEnumType,
-} from '@nestjs/graphql';
+import { ArgsType, Field, Float, InputType, ObjectType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
 import {
   ArrayMaxSize,
@@ -27,8 +20,6 @@ import { ResField } from 'src/common/result/result.decorator';
 import { FileUpload, GraphQLUpload } from 'graphql-upload';
 import { SERVICE_DESCRIPTION_LENGTH } from '../../common/constants';
 import { Weather } from '@retrip/js';
-
-registerEnumType(Weather, { name: 'Weather' });
 
 @InputType({ isAbstract: true })
 @ObjectType()

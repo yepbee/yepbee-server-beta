@@ -35,6 +35,7 @@ import { InventoryModule } from './inventory/inventory.module';
 import { NftBanner } from './validation/entities/nftBanner.entity';
 import { BannerTag } from './validation/entities/bannerTag.entity';
 import { Transactions } from './users/entities/transactions.entity';
+import { StateModule } from './state/state.module';
 
 @Module({
   imports: [
@@ -90,6 +91,7 @@ import { Transactions } from './users/entities/transactions.entity';
     TokenModule.forRoot(),
     UsersModule.forRoot(),
     AuthModule.forRoot(),
+    StateModule.forRoot(),
     Web3Module.forRoot({
       secretKey: Uint8Array.from(JSON.parse(_.ENVS.WEB3_MASTER_SECRET_KEY)),
       clusterApiUrl: _.ENVS.WEB3_CLUSTER_API_URL as Cluster,

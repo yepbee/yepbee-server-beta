@@ -35,6 +35,7 @@ export class AuthGuard implements CanActivate {
         case 'Unknown':
           return true;
         default:
+          return false;
       }
     }
     return false;

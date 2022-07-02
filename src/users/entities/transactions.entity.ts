@@ -1,10 +1,4 @@
-import {
-  Field,
-  Float,
-  InputType,
-  ObjectType,
-  registerEnumType,
-} from '@nestjs/graphql';
+import { Field, Float, InputType, ObjectType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
 import {
   IsEnum,
@@ -13,27 +7,11 @@ import {
   Min,
   ValidateNested,
 } from 'class-validator';
+import { CurrencyType, TransactionType } from 'src/common/constants';
 import { PureEntity } from 'src/common/entites';
 import { IsWalletPublicKey } from 'src/common/validators';
 import { BeforeInsert, BeforeUpdate, Column, Entity, ManyToOne } from 'typeorm';
 import { User } from './user.entity';
-
-export enum TransactionType {
-  Reward,
-  Mint,
-  Withdraw,
-  System,
-  Unknown,
-}
-
-registerEnumType(TransactionType, { name: 'TransactionType' });
-
-export enum CurrencyType {
-  Sol,
-  RTRP,
-}
-
-registerEnumType(CurrencyType, { name: 'CurrencyType' });
 
 @InputType('TransactionsInput')
 @ObjectType()
