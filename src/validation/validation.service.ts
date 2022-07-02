@@ -282,7 +282,7 @@ export class ValidationService {
     if (data.length > this.RD_MAX)
       return Err(`The daily reward must be less than ${this.RD_MAX}`);
 
-    const rtimes = await this.varificationsService.findRtimes(data);
+    const rtimes = await this.varificationsService.findAndMapAllRtimes(data);
 
     if (rtimes.length <= 1)
       return Err(`Valid data length must be longer than 1`);
