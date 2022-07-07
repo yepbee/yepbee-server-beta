@@ -1,5 +1,7 @@
 import { DynamicModule, Global, Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { KEY_OPTIONS } from 'src/common/constants';
+import { User } from 'src/users/entities/user.entity';
 import { StateModuleOptions } from './state.interface';
 import { StateService } from './state.service';
 
@@ -9,7 +11,7 @@ export class StateModule {
   static forRoot(options: StateModuleOptions = { test: '' }): DynamicModule {
     return {
       module: StateModule,
-      imports: [],
+      imports: [TypeOrmModule.forFeature([User])],
       providers: [
         {
           provide: KEY_OPTIONS,
