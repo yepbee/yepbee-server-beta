@@ -25,11 +25,11 @@ export class StateService extends AtomicService<UserState> {
   beforeEach<T>(...args: T[]): void {
     return;
   }
-  afterEach<T>(...args: T[]): void {
+  async afterEach<T>(...args: T[]): Promise<void> {
     const first = args.shift();
     if (first instanceof User) {
       first.state = this.currentService;
-      this.usersRepository.save(first); // saving current state
+      await this.usersRepository.save(first); // saving current state
     }
     return;
   }
