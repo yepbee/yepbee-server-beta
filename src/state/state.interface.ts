@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 export type StateModuleOptions = {
   test: string;
 };
@@ -5,7 +7,7 @@ export type StateModuleOptions = {
 export type Enum = string;
 
 export type ServiceEnum<T extends Enum> = Record<T, T>;
-export type ServiceAdjacencyList<T extends Enum> = Record<T, T[]>;
+export type ServiceAdjacencyList<T extends Enum> = Record<T, unknown[]>;
 
 export type Undo = () => void;
 export type Do = () => Undo;
@@ -18,81 +20,93 @@ export type ServiceInfo<T extends Enum> = {
 };
 
 export abstract class AtomicService<S extends Enum> {
-  private serviceStack: ServiceInfo<S>[] = [];
+  private stack: ServiceInfo<S>[] = [];
   get currentService(): S {
-    if (this.serviceStack.length === 0) return this.root;
-    return this.serviceStack[this.serviceStack.length - 1].name;
+    if (this.stack.length === 0) return this.rootService;
+    return this.stack[this.stack.length - 1].name;
   }
-  get stack(): readonly ServiceInfo<S>[] {
-    return this.serviceStack;
+  get serviceStack(): readonly ServiceInfo<S>[] {
+    return this.stack;
   }
   constructor(
     readonly serviceAdjacencyList: ServiceAdjacencyList<S>,
     readonly services: Services<S>,
-    readonly root: S,
+    readonly rootService: S,
   ) {}
-  abstract beforeAll<T>(...args: T[]): void;
-  abstract afterAll<T>(...args: T[]): void;
-  abstract beforeEach<T>(...args: T[]): void;
-  abstract afterEach<T>(...args: T[]): void;
-  abstract backBeforeEach<T>(...args: T[]): void;
-  abstract backAfterEach<T>(...args: T[]): void;
+  async beforeAll(...args: unknown[]): Promise<void> {
+    return;
+  }
+  async afterAll(...args: unknown[]): Promise<void> {
+    return;
+  }
+  async beforeEach(...args: unknown[]): Promise<void> {
+    return;
+  }
+  async afterEach(...args: unknown[]): Promise<void> {
+    return;
+  }
+  async backBeforeEach(...args: unknown[]): Promise<void> {
+    return;
+  }
+  async backAfterEach(...args: unknown[]): Promise<void> {
+    return;
+  }
   clearStack(): boolean {
-    this.serviceStack = [];
+    this.stack = [];
     return true;
   }
   isRoot(root: S): boolean {
-    return this.root === root;
+    return this.rootService === root;
   }
   canDo(service: S): boolean {
     return this.serviceAdjacencyList[this.currentService].includes(service);
   }
-  prev<T>(...args: T[]): boolean {
-    if (this.serviceStack.length === 0) return false;
+  async prev(...args: unknown[]): Promise<boolean> {
+    if (this.stack.length === 0) return false;
     try {
-      this.backBeforeEach(...args);
-      this.serviceStack.pop().undo();
-      this.backAfterEach(...args);
+      await this.backBeforeEach(...args);
+      this.stack.pop().undo();
+      await this.backAfterEach(...args);
     } catch (e) {
       console.error('* Failed to back run', e);
       return false;
     }
     return true;
   }
-  next<T>(service: S, ...args: T[]): boolean {
+  async next(service: S, ...args: unknown[]): Promise<boolean> {
     if (this.canDo(service) === false) return false;
 
-    if (this.isRoot(this.currentService)) this.beforeAll(); // -----
+    if (this.isRoot(this.currentService)) await this.beforeAll(); // -----
     if (this.isRoot(service)) {
-      this.afterAll(...args); // -----
+      await this.afterAll(...args); // -----
       return this.clearStack(); // true
     }
 
     try {
-      this.beforeEach(...args);
+      await this.beforeEach(...args);
       const backtrack = this.services[service]();
-      this.serviceStack.push({ name: service, undo: backtrack });
+      this.stack.push({ name: service, undo: backtrack });
     } catch (e) {
-      this.backRun(...args);
+      await this.backRun(...args);
       return false;
     }
     try {
-      this.afterEach(...args);
+      await this.afterEach(...args);
     } catch (e) {
-      this.backRun(...args);
+      await this.backRun(...args);
       return false;
     }
     return true;
   }
-  backRun<T>(...args: T[]): boolean {
+  async backRun(...args: unknown[]): Promise<boolean> {
     while (this.stack.length) {
-      if (this.prev(...args) === false) return false;
+      if ((await this.prev(...args)) === false) return false;
     }
     return true;
   }
-  run<T>(services: S[], ...args: T[]): boolean {
+  async run(services: S[], ...args: unknown[]): Promise<boolean> {
     for (const service of services) {
-      if (this.next(service, ...args) === false) return false;
+      if ((await this.next(service, ...args)) === false) return false;
     }
     return true;
   }

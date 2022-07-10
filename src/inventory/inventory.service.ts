@@ -54,7 +54,8 @@ export class InventoryService {
     latitude,
     longitude,
     radiusM,
-  }: GetBannersByRingInput): Promise<GetBannersByRingOutput> {
+  }: // maxCount = 20, * by likes
+  GetBannersByRingInput): Promise<GetBannersByRingOutput> {
     const latLng = { latitude, longitude };
     const abs = Math.abs;
     const latUp = abs(

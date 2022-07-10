@@ -15,28 +15,13 @@ export class StateService extends AtomicService<UserState> {
     @InjectRepository(User) private readonly usersRepository: Repository<User>,
   ) {
     super(userStateAdjacencyList, userStateServices, UserState.None);
+    this.next(UserState.ExploreMode, 23);
   }
-  beforeAll<T>(...args: T[]): void {
-    return;
-  }
-  afterAll<T>(...args: T[]): void {
-    return;
-  }
-  beforeEach<T>(...args: T[]): void {
-    return;
-  }
-  async afterEach<T>(...args: T[]): Promise<void> {
+  async afterEach(...args: unknown[]): Promise<void> {
     const first = args.shift();
     if (first instanceof User) {
       first.state = this.currentService;
       await this.usersRepository.save(first); // saving current state
     }
-    return;
-  }
-  backBeforeEach<T>(...args: T[]): void {
-    return;
-  }
-  backAfterEach<T>(...args: T[]): void {
-    return;
   }
 }
