@@ -9,8 +9,8 @@ export type Enum = string;
 export type ServiceEnum<T extends Enum> = Record<T, T>;
 export type ServiceAdjacencyList<T extends Enum> = Record<T, unknown[]>;
 
-export type Undo = () => void;
-export type Do = () => Undo;
+export type Undo = (...args: unknown[]) => Promise<void>;
+export type Do = (...args: unknown[]) => Promise<Undo>;
 
 export type Services<T extends Enum> = Record<T, Do>;
 
@@ -65,7 +65,7 @@ export abstract class AtomicService<S extends Enum> {
     if (this.stack.length === 0) return false;
     try {
       await this.backBeforeEach(...args);
-      this.stack.pop().undo();
+      await this.stack.pop().undo(...args);
       await this.backAfterEach(...args);
     } catch (e) {
       console.error('* Failed to back run', e);
@@ -76,7 +76,7 @@ export abstract class AtomicService<S extends Enum> {
   async next(service: S, ...args: unknown[]): Promise<boolean> {
     if (this.canDo(service) === false) return false;
 
-    if (this.isRoot(this.currentService)) await this.beforeAll(); // -----
+    if (this.isRoot(this.currentService)) await this.beforeAll(...args); // -----
     if (this.isRoot(service)) {
       await this.afterAll(...args); // -----
       return this.clearStack(); // true
@@ -84,7 +84,7 @@ export abstract class AtomicService<S extends Enum> {
 
     try {
       await this.beforeEach(...args);
-      const backtrack = this.services[service]();
+      const backtrack = await this.services[service](...args);
       this.stack.push({ name: service, undo: backtrack });
     } catch (e) {
       await this.backRun(...args);
