@@ -3,63 +3,71 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Transactions } from 'src/users/entities/transactions.entity';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
-import { UserState } from './state.constant';
+import { AuthUserState } from 'src/common/constants';
 import { AtomicService } from './state.interface';
 
 @Injectable()
-export class StateService extends AtomicService<UserState> {
+export class StateService extends AtomicService<AuthUserState> {
   constructor(
     @InjectRepository(User) private readonly usersRepository: Repository<User>,
     @InjectRepository(Transactions)
     private readonly transactionsRepository: Repository<Transactions>,
   ) {
     super(
+      // {
+      // None: [
+      // AuthUserState.None,
+      // AuthUserState.RecordingTransaction,
+      // AuthUserState.BuyingBasket,
+      // AuthUserState.ValidatingHoneycon,
+      // AuthUserState.UploadingPhotoToArweave,
+      // ],
+      // RecordingTransaction: [AuthUserState.None],
+      // BuyingBasket: [AuthUserState.RecordingTransaction],
+      // ValidatingHoneycon: [AuthUserState.None],
+      // ------- Minting -------
+      // UploadingPhotoToArweave: [AuthUserState.UploadingMetadataToArweave],
+      // UploadingMetadataToArweave: [AuthUserState.MintingBanner],
+      //   UploadingToArweave: [AuthUserState.MintingBanner],
+      //   MintingBanner: [AuthUserState.RecordingTransaction],
+      // },
       {
-        None: [
-          UserState.None,
-          UserState.RecordingTransaction,
-          UserState.BuyingBasket,
-          UserState.MoveMode,
-          UserState.ExploreMode,
-          UserState.ValidatingHoneycon,
-          UserState.UploadingPhotoToArweave,
-        ],
-        RecordingTransaction: [UserState.None],
-        BuyingBasket: [UserState.RecordingTransaction],
-        MoveMode: [UserState.None, UserState.ExploreMode],
-        ExploreMode: [UserState.None, UserState.MoveMode],
-        ValidatingHoneycon: [UserState.None],
-        // ------- Minting -------
-        UploadingPhotoToArweave: [UserState.UploadingMetadataToArweave],
-        UploadingMetadataToArweave: [UserState.MintingBanner],
-        MintingBanner: [UserState.RecordingTransaction],
+        None: [AuthUserState.UploadingToArweave],
+        UploadingToArweave: [AuthUserState.MintingBanner],
+        MintingBanner: [AuthUserState.None],
       },
       {
         None: async () => () => undefined,
-        RecordingTransaction: async (transaction: Transactions) => {
-          const genesisTx = this.transactionsRepository.create(transaction);
-          await this.transactionsRepository.save(genesisTx);
-          return async () => {
-            await this.transactionsRepository.delete(transaction.id);
-          };
-        },
-        BuyingBasket: async () => () => undefined,
-        MoveMode: async () => () => undefined,
-        ExploreMode: async () => () => undefined,
-        ValidatingHoneycon: async () => () => undefined,
-        UploadingPhotoToArweave: async () => () => undefined,
-        UploadingMetadataToArweave: async () => () => undefined,
+        /**
+          async (user: User, transaction: Transactions) => {
+            const genesisTx = this.transactionsRepository.create(transaction);
+            await this.transactionsRepository.save(genesisTx);
+            return async () => {
+              await this.transactionsRepository.delete(transaction.id);
+            };
+          },
+         */
+        UploadingToArweave: async () => () => undefined,
         MintingBanner: async () => () => undefined,
       },
-      UserState.None,
+      AuthUserState.None,
     );
     // ------------------------------- need to fix this
   }
-  async afterEach(...args: unknown[]): Promise<void> {
-    const first = args.shift();
-    if (first instanceof User) {
-      first.state = this.currentService;
-      await this.usersRepository.save(first); // saving current state
+  async afterEach(
+    currentService: AuthUserState,
+    ...args: unknown[]
+  ): Promise<void> {
+    const [user, stateValue] = args;
+    if (
+      user &&
+      stateValue &&
+      user instanceof User &&
+      typeof stateValue === 'string'
+    ) {
+      user.state = currentService;
+      user.stateValue = stateValue;
+      await this.usersRepository.save(user); // saving current state
     }
   }
 }

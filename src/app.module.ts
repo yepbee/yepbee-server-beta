@@ -115,6 +115,7 @@ import { MintModule } from './mint/mint.module';
     }),
     MintModule.forRoot({
       h3MintingResolution: +_.ENVS.H3_MINTING_RESOLUTION,
+      rtrpPerUploadingToArweave: +_.ENVS.SERVICE_RTRP_PER_UPLOADING_TO_ARWEAVE,
       rtrpPerMintingBanner: +_.ENVS.SERVICE_RTRP_PER_MINTING_BANNER,
     }),
   ],

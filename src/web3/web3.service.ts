@@ -49,7 +49,13 @@ export class Web3Service {
   private readonly connection: web3.Connection;
   private readonly keypair: web3.Keypair;
   readonly masterPubkey: PublicKey;
+  get masterPubkeyString(): string {
+    return this.masterPubkey.toString();
+  }
   readonly masterTokenAccount: PublicKey;
+  get masterTokenAccountString(): string {
+    return this.masterTokenAccount.toString();
+  }
   readonly program: Program<RetripJs>;
   private readonly bundlr: Bundlr;
   constructor(

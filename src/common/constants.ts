@@ -30,6 +30,8 @@ export const KEY_USER = 'user';
 
 export const KEY_ROLES = 'roles';
 
+export const KEY_USER_STATE = 'user_states';
+
 export const contentTypes = {
   'application/json': '',
   'image/jpeg': '',
@@ -41,6 +43,14 @@ export enum AuthRole {
   Guest = 'Guest', // not yet signed
   User = 'User', // sigend user
   ValidUser = 'ValidUser', // premium user
+}
+
+export enum AuthUserState {
+  None = 'None',
+  // BuyingBasket = 'BuyingBasket',
+  // ValidatingHoneycon = 'ValidatingHoneycon',
+  UploadingToArweave = 'UploadingToArweave',
+  MintingBanner = 'MintingBanner',
 }
 
 export enum RtimeId {
@@ -59,6 +69,7 @@ export enum CurrencyType {
 
 export enum TransactionType {
   Reward,
+  Upload,
   Mint,
   Withdraw,
   System,
@@ -70,3 +81,5 @@ registerEnumType(Weather, { name: 'Weather' });
 registerEnumType(TokenSymbol, { name: 'TokenSymbol' });
 registerEnumType(CurrencyType, { name: 'CurrencyType' });
 registerEnumType(TransactionType, { name: 'TransactionType' });
+
+registerEnumType(AuthUserState, { name: 'UserState' });

@@ -24,7 +24,7 @@ import { ValidProperty } from './validProperty.entity';
 import { RTIME_LENGTH } from 'src/rtime/rtime.constant';
 import { NftBanner } from 'src/mint/entities/nftBanner.entity';
 import { Transactions } from './transactions.entity';
-import { UserState } from 'src/state/state.constant';
+import { AuthUserState } from 'src/common/constants';
 
 @InputType('UserInput')
 @ObjectType()
@@ -42,10 +42,15 @@ export class User extends CoreEntity {
   @JoinColumn({ name: 'validProperty' })
   validProperty?: ValidProperty; // joined dapp peer
 
-  @Column({ type: 'enum', enum: UserState, default: UserState.None })
-  @Field(() => UserState)
-  @IsEnum(UserState)
-  state: UserState;
+  @Column({ type: 'enum', enum: AuthUserState, default: AuthUserState.None })
+  @Field(() => AuthUserState)
+  @IsEnum(AuthUserState)
+  state: AuthUserState;
+
+  @Column({ nullable: true })
+  @Field(() => String)
+  @IsString()
+  stateValue: string;
 
   @Field(() => String)
   @IsWalletPublicKey()
