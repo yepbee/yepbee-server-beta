@@ -37,6 +37,7 @@ import { BannerTag } from './mint/entities/bannerTag.entity';
 import { Transactions } from './users/entities/transactions.entity';
 import { StateModule } from './state/state.module';
 import { MintModule } from './mint/mint.module';
+import { AppResolver } from './app.resolver';
 
 @Module({
   imports: [
@@ -120,7 +121,7 @@ import { MintModule } from './mint/mint.module';
     }),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, AppResolver],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

@@ -24,9 +24,9 @@ export class AppController {
   }
 
   // for the test purpose
-  // @Get('faucet')
-  // async faucet(): Promise<string> {
-  //   return this.web3Service.faucet();
+  // @Get('faucetMaster')
+  // async faucetMaster(): Promise<string> {
+  //   return this.web3Service.faucetMaster();
   // }
 
   @Get()

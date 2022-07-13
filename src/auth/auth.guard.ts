@@ -31,16 +31,18 @@ export class AuthGuard implements CanActivate {
       switch (role) {
         case 'ValidUser':
           if (ctx[KEY_USER] && (ctx[KEY_USER] as User).validProperty) {
-            if (userStates)
+            if (userStates) {
               return userStates.includes((ctx[KEY_USER] as User).state);
+            }
 
             return true;
           }
           break;
         case 'User':
           if (ctx[KEY_USER]) {
-            if (userStates)
+            if (userStates) {
               return userStates.includes((ctx[KEY_USER] as User).state);
+            }
 
             return true;
           }
