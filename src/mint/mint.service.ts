@@ -4,7 +4,6 @@ import {
   contentTypes,
   CurrencyType,
   KEY_OPTIONS,
-  TokenSymbol,
   TransactionType,
 } from 'src/common/constants';
 import { AsyncTryCatch } from 'src/common/decorators';
@@ -19,6 +18,8 @@ import {
   ArweaveURL,
   createBannerMetadata,
   getTokenBalance,
+  Metadata,
+  parseBannerMetadata,
   PROGRAM_ID,
   Weather,
 } from '@retrip/js';
@@ -311,10 +312,10 @@ export class MintService {
     const creatorPubkey = this.web3Service.newPublicKey(user.pubkey);
     const metadataUrl = user.stateValue;
     if (!metadataUrl) return Err(`invalid stateValue`);
-    const { data } = await got.get(metadataUrl).json();
-    if (typeof data !== 'object') return Err(`invalid metadataUrl`);
-    const { name } = data;
-    if (!name) return Err(`invalid metadataUrl`);
+    const data = await got(metadataUrl).json<Metadata>();
+    console.log('get metadata : ', data);
+    if (typeof data !== 'object' || !data.name)
+      return Err(`invalid metadataUrl`);
 
     const txhash = await this.pay(user, this.RTRP_PER_MINTING_BANNER);
     try {
@@ -334,7 +335,7 @@ export class MintService {
       const mintingResult = await this.web3Service.mintNFT(
         creatorPubkey,
         metadataUrl,
-        name,
+        data.name,
         'rtb1',
         'banner',
       );
@@ -377,26 +378,11 @@ export class MintService {
   async cacheBanner(user: User): Promise<NewStateOutput> {
     const [metadataUrl, mintKey, txhash] = user.stateValue.split(' ');
     if (!metadataUrl || !mintKey || !txhash) return Err(`invalid stateValue`);
-    const { data } = await got.get(metadataUrl).json();
+    const data = await got(metadataUrl).json<Metadata>();
+    console.log('get metadata : ', data);
     if (typeof data !== 'object') return Err(`invalid metadataUrl`);
-    const {
-      latitude,
-      longitude,
-      weather,
-      temperatureCel,
-      tags,
-      description = '',
-      imageUrl,
-    } = data;
-    if (
-      !latitude ||
-      !longitude ||
-      !weather ||
-      !temperatureCel ||
-      !tags ||
-      !imageUrl
-    )
-      return Err(`invalid metadataUrl`);
+
+    const parsedMetadata = parseBannerMetadata(data);
 
     console.log('saving into our database..');
     const banner = this.nftBannersRepository.create({
@@ -404,17 +390,8 @@ export class MintService {
       ownerUser: user,
       mintKey,
       txhash,
-      version: 1,
-      tokenId: 1, // temporary
-      symbol: TokenSymbol.rtb1,
-      latitude,
-      longitude,
-      weather,
-      temperatureCel,
-      tags,
-      description,
       metadataUrl,
-      imageUrl,
+      ...parsedMetadata,
     });
 
     await this.nftBannersRepository.save(banner);
@@ -426,6 +403,41 @@ export class MintService {
     return Ok({ newState, stateValue });
   }
 
+  @AsyncTryCatch()
+  @AllowUserState(['UploadingToArweave', 'MintingBanner'])
+  async cancelMinting(user: User): Promise<NewStateOutput> {
+    let paybackCost: number;
+
+    switch (user.state) {
+      case AuthUserState.UploadingToArweave:
+        paybackCost = this.RTRP_PER_UPLOADING_ARWEAVE;
+        break;
+      case AuthUserState.MintingBanner:
+        paybackCost =
+          this.RTRP_PER_UPLOADING_ARWEAVE + this.RTRP_PER_MINTING_BANNER;
+        break;
+    }
+
+    const txhash = await this.payback(user, paybackCost * 0.8); // 80% payback
+    try {
+      await this.recordingTransaction(
+        user,
+        txhash,
+        this.web3Service.masterPubkeyString,
+        user.pubkey,
+        paybackCost * 0.8,
+        TransactionType.System,
+      );
+    } catch (e) {
+      console.error("couldn't record the transaction", e);
+    }
+
+    const newState = AuthUserState.None;
+    const stateValue = '';
+    await this.stateService.next(user.state, newState, user, stateValue); // to initial
+
+    return Ok({ newState, stateValue });
+  }
   // // version 1
   // @AsyncTryCatch()
   // async mintBanner(

@@ -1,5 +1,5 @@
 import { Field, Float, InputType, ObjectType } from '@nestjs/graphql';
-import { Weather } from '@retrip/js';
+import { TokenSymbol, Weather } from '@retrip/js';
 import { Type } from 'class-transformer';
 import {
   ArrayMaxSize,
@@ -17,7 +17,6 @@ import {
   H3_WALKING_RESOLUTION,
   SERVICE_DESCRIPTION_LENGTH,
   SERVICE_TAGS_MAX_SIZE,
-  TokenSymbol,
 } from 'src/common/constants';
 import { CoreEntity } from 'src/common/entites';
 import { IsH3Index } from 'src/common/validators';

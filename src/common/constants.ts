@@ -3,8 +3,11 @@ import { GlobalOptions } from './interfaces';
 export * as web3 from '@solana/web3.js';
 import * as bs58 from 'bs58';
 import { registerEnumType } from '@nestjs/graphql';
-import { Weather } from '@retrip/js';
 export { bs58 };
+import { TokenSymbol, Weather } from '@retrip/js';
+
+registerEnumType(Weather, { name: 'Weather' });
+registerEnumType(TokenSymbol, { name: 'TokenSymbol' });
 
 export const SERVICE_DESCRIPTION_LENGTH = 2200;
 
@@ -58,10 +61,6 @@ export enum RtimeId {
   Walking = 'Walking',
 }
 
-export enum TokenSymbol {
-  rtb1,
-}
-
 export enum CurrencyType {
   Sol,
   RTRP,
@@ -77,8 +76,6 @@ export enum TransactionType {
 }
 
 registerEnumType(RtimeId, { name: 'RtimeId' });
-registerEnumType(Weather, { name: 'Weather' });
-registerEnumType(TokenSymbol, { name: 'TokenSymbol' });
 registerEnumType(CurrencyType, { name: 'CurrencyType' });
 registerEnumType(TransactionType, { name: 'TransactionType' });
 

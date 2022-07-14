@@ -11,7 +11,7 @@ export class AppResolver {
 
   @Mutation(() => StringOutput)
   @Allow(['ValidUser'])
-  @AllowUserState(['None'])
+  // @AllowUserState(['None'])
   faucet(@AuthUser() user: User): Promise<StringOutput> {
     return this.web3Service.faucet(user);
   }

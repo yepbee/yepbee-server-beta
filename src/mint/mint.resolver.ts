@@ -38,4 +38,11 @@ export class MintResolver {
   cacheBanner(@AuthUser() user: User): Promise<NewStateOutput> {
     return this.mintsServise.mintBanner(user);
   }
+
+  @Mutation(() => NewStateOutput)
+  @Allow(['ValidUser'])
+  @AllowUserState(['UploadingToArweave', 'MintingBanner'])
+  cancelMinting(@AuthUser() user: User): Promise<NewStateOutput> {
+    return this.mintsServise.cancelMinting(user);
+  }
 }
