@@ -93,13 +93,17 @@ export class NftBanner extends CoreEntity {
   @Field(() => User)
   @ValidateNested()
   @Type(() => User)
-  @ManyToOne(() => User, (user: User) => user.createdBanners, { cascade: true })
+  @ManyToOne(() => User, (user: User) => user.createdBanners, {
+    cascade: ['insert', 'update'],
+  })
   creatorUser: User;
 
   @Field(() => User)
   @ValidateNested()
   @Type(() => User)
-  @ManyToOne(() => User, (user: User) => user.ownedBanners, { cascade: true })
+  @ManyToOne(() => User, (user: User) => user.ownedBanners, {
+    cascade: ['insert', 'update'],
+  })
   ownerUser: User;
 
   @Field(() => Number, { defaultValue: 5 })

@@ -138,8 +138,8 @@ export class MintService {
       amount,
       type,
     });
-
     await this.transactionsRepository.save(tx);
+    user.transactions.push(tx);
   }
 
   // -------------------------
@@ -157,6 +157,7 @@ export class MintService {
       temperatureCel,
     }: UploadToArweaveInput,
   ): Promise<NewStateOutput> {
+    console.log('None', user);
     const tokenId = 1; // for test (temporary)
     const { mimetype, createReadStream } = await file;
     // check mime-type
@@ -309,6 +310,7 @@ export class MintService {
   @AsyncTryCatch()
   @AllowUserState(['UploadingToArweave'])
   async mintBanner(user: User): Promise<NewStateOutput> {
+    console.log('UploadingToArweave', user);
     const creatorPubkey = this.web3Service.newPublicKey(user.pubkey);
     const metadataUrl = user.stateValue;
     if (!metadataUrl) return Err(`invalid stateValue`);
@@ -376,6 +378,7 @@ export class MintService {
   @AsyncTryCatch()
   @AllowUserState(['MintingBanner'])
   async cacheBanner(user: User): Promise<NewStateOutput> {
+    console.log('MintingBanner', user);
     const [metadataUrl, mintKey, txhash] = user.stateValue.split(' ');
     if (!metadataUrl || !mintKey || !txhash) return Err(`invalid stateValue`);
     const data = await got(metadataUrl).json<Metadata>();
@@ -384,17 +387,19 @@ export class MintService {
 
     const parsedMetadata = parseBannerMetadata(data);
 
-    console.log('saving into our database..');
+    console.log('saving into our database..', parsedMetadata);
     const banner = this.nftBannersRepository.create({
+      ...parsedMetadata,
       creatorUser: user,
       ownerUser: user,
       mintKey,
       txhash,
       metadataUrl,
-      ...parsedMetadata,
     });
 
     await this.nftBannersRepository.save(banner);
+    user.ownedBanners.push(banner);
+    user.createdBanners.push(banner);
 
     const newState = AuthUserState.None;
     const stateValue = '';
@@ -406,6 +411,7 @@ export class MintService {
   @AsyncTryCatch()
   @AllowUserState(['UploadingToArweave', 'MintingBanner'])
   async cancelMinting(user: User): Promise<NewStateOutput> {
+    console.log('cancelMinting', user);
     let paybackCost: number;
 
     switch (user.state) {
@@ -416,6 +422,16 @@ export class MintService {
         paybackCost =
           this.RTRP_PER_UPLOADING_ARWEAVE + this.RTRP_PER_MINTING_BANNER;
         break;
+    }
+
+    const newState = AuthUserState.None;
+    const stateValue = '';
+    // to initial
+    if (
+      (await this.stateService.next(user.state, newState, user, stateValue)) ===
+      false
+    ) {
+      throw new Error(`couldn't change the state ${newState}`);
     }
 
     const txhash = await this.payback(user, paybackCost * 0.8); // 80% payback
@@ -431,10 +447,6 @@ export class MintService {
     } catch (e) {
       console.error("couldn't record the transaction", e);
     }
-
-    const newState = AuthUserState.None;
-    const stateValue = '';
-    await this.stateService.next(user.state, newState, user, stateValue); // to initial
 
     return Ok({ newState, stateValue });
   }

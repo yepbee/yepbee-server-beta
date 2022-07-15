@@ -4,7 +4,7 @@ export type StateModuleOptions = {
   test: string;
 };
 
-export type Enum = string;
+type Enum = string;
 
 export type ServiceEnum<T extends Enum> = Record<T, T>;
 export type ServiceAdjacencyList<T extends Enum> = Record<T, unknown[]>;
@@ -83,6 +83,7 @@ export abstract class AtomicService<S extends Enum> {
     if (this.isRoot(currentService))
       await this.beforeAll(currentService, ...args); // -----
     if (this.isRoot(nextService)) {
+      await this.afterEach(nextService, ...args);
       await this.afterAll(nextService, ...args); // -----
       return true; // this.clearStack(); // true
     }

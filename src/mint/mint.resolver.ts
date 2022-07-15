@@ -36,7 +36,7 @@ export class MintResolver {
   @Allow(['ValidUser'])
   @AllowUserState(['MintingBanner'])
   cacheBanner(@AuthUser() user: User): Promise<NewStateOutput> {
-    return this.mintsServise.mintBanner(user);
+    return this.mintsServise.cacheBanner(user);
   }
 
   @Mutation(() => NewStateOutput)

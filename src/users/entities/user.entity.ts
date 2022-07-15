@@ -47,7 +47,7 @@ export class User extends CoreEntity {
   @IsEnum(AuthUserState)
   state: AuthUserState;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, default: '' })
   @Field(() => String)
   @IsString()
   stateValue: string;

@@ -61,10 +61,11 @@ export class Transactions extends PureEntity {
     const tokenAccount =
       this.owner.validProperty?.internalTokenAccounts?.tokenAccount;
     if (
-      this.from !== pubkey &&
-      this.from !== tokenAccount &&
-      this.to !== pubkey &&
-      this.to !== tokenAccount
+      this.owner == null ||
+      (this.from !== pubkey &&
+        this.from !== tokenAccount &&
+        this.to !== pubkey &&
+        this.to !== tokenAccount)
     ) {
       throw new Error(`Invalid transaction for ${pubkey}`);
     }
