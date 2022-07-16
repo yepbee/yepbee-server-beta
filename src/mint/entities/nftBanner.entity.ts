@@ -1,11 +1,5 @@
-import {
-  Field,
-  Float,
-  InputType,
-  ObjectType,
-  registerEnumType,
-} from '@nestjs/graphql';
-import { Weather } from '@retrip/js';
+import { Field, Float, InputType, ObjectType } from '@nestjs/graphql';
+import { TokenSymbol, Weather } from '@retrip/js';
 import { Type } from 'class-transformer';
 import {
   ArrayMaxSize,
@@ -23,7 +17,6 @@ import {
   H3_WALKING_RESOLUTION,
   SERVICE_DESCRIPTION_LENGTH,
   SERVICE_TAGS_MAX_SIZE,
-  TokenSymbol,
 } from 'src/common/constants';
 import { CoreEntity } from 'src/common/entites';
 import { IsH3Index } from 'src/common/validators';
@@ -38,9 +31,6 @@ import {
   ManyToOne,
 } from 'typeorm';
 import { BannerTag } from './bannerTag.entity';
-
-registerEnumType(TokenSymbol, { name: 'TokenSymbol' });
-registerEnumType(Weather, { name: 'Weather' });
 
 @InputType('NftBannerInput')
 @ObjectType()
@@ -103,13 +93,17 @@ export class NftBanner extends CoreEntity {
   @Field(() => User)
   @ValidateNested()
   @Type(() => User)
-  @ManyToOne(() => User, (user: User) => user.createdBanners, { cascade: true })
+  @ManyToOne(() => User, (user: User) => user.createdBanners, {
+    cascade: ['insert', 'update'],
+  })
   creatorUser: User;
 
   @Field(() => User)
   @ValidateNested()
   @Type(() => User)
-  @ManyToOne(() => User, (user: User) => user.ownedBanners, { cascade: true })
+  @ManyToOne(() => User, (user: User) => user.ownedBanners, {
+    cascade: ['insert', 'update'],
+  })
   ownerUser: User;
 
   @Field(() => Number, { defaultValue: 5 })

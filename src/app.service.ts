@@ -10,6 +10,7 @@ import { EnvService } from './env/env.service';
 import { RtimeService } from './rtime/rtime.service';
 import { User } from './users/entities/user.entity';
 import { Verification } from './users/entities/verification.entity';
+import { AccountKeys, ACCOUNT_KEYS } from '@retrip/js';
 
 @Injectable()
 export class AppService {
@@ -23,7 +24,11 @@ export class AppService {
   ) {}
 
   welcome(): string {
-    return 'Welcome To Retrip!';
+    return 'Welcome To Retrip! 2022.7.16 17:13';
+  }
+
+  keys(): AccountKeys {
+    return ACCOUNT_KEYS;
   }
 
   async rtime(id: RtimeId): Promise<string> {

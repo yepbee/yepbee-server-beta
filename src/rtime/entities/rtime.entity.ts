@@ -1,11 +1,9 @@
-import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { Field, ObjectType } from '@nestjs/graphql';
 import { IsEnum, IsNumber, IsString, Length } from 'class-validator';
 import { Column, Entity, PrimaryColumn } from 'typeorm';
 import { RtimeId } from 'src/common/constants';
 import { stringToSnakeCase } from 'src/common/functions';
 import { RTIME_LENGTH } from '../rtime.constant';
-
-registerEnumType(RtimeId, { name: 'RtimeId' });
 
 @Entity()
 @ObjectType()

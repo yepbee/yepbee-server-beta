@@ -10,7 +10,7 @@ import { ArrayMaxSize, IsArray, ValidateNested } from 'class-validator';
 import { CoreOutput } from 'src/common/dtos';
 import { ResField } from 'src/common/result/result.decorator';
 import { User } from 'src/users/entities/user.entity';
-import { NftBanner } from 'src/validation/entities/nftBanner.entity';
+import { NftBanner } from 'src/mint/entities/nftBanner.entity';
 
 @InputType()
 export class PartialBannerInput extends PartialType(

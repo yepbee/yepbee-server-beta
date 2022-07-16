@@ -1,11 +1,4 @@
-import {
-  ArgsType,
-  Field,
-  Float,
-  InputType,
-  ObjectType,
-  registerEnumType,
-} from '@nestjs/graphql';
+import { ArgsType, Field, Float, InputType, ObjectType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
 import {
   ArrayMaxSize,
@@ -18,26 +11,13 @@ import {
   Length,
   ValidateNested,
 } from 'class-validator';
+import { FileUpload, GraphQLUpload } from 'graphql-upload';
+import { Weather } from '@retrip/js';
 import {
+  SERVICE_DESCRIPTION_LENGTH,
   SERVICE_TAGS_MAX_SIZE,
   SERVICE_TAG_LENGTH,
 } from 'src/common/constants';
-import { CoreOutput } from 'src/common/dtos';
-import { ResField } from 'src/common/result/result.decorator';
-import { FileUpload, GraphQLUpload } from 'graphql-upload';
-import { SERVICE_DESCRIPTION_LENGTH } from '../../common/constants';
-import { Weather } from '@retrip/js';
-
-registerEnumType(Weather, { name: 'Weather' });
-
-@InputType({ isAbstract: true })
-@ObjectType()
-export class Tag {
-  @Field(() => String)
-  @IsString()
-  @Length(2, SERVICE_TAG_LENGTH)
-  value: string;
-}
 
 @InputType({ isAbstract: true })
 @ObjectType()
@@ -50,8 +30,17 @@ export class LatLng {
   longitude: number;
 }
 
+@InputType({ isAbstract: true })
+@ObjectType()
+export class Tag {
+  @Field(() => String)
+  @IsString()
+  @Length(2, SERVICE_TAG_LENGTH)
+  value: string;
+}
+
 @ArgsType()
-export class MintBannerInput {
+export class UploadToArweaveInput {
   @Field(() => GraphQLUpload)
   file: FileUpload;
 
@@ -79,10 +68,4 @@ export class MintBannerInput {
   @Field(() => Float)
   @IsNumber()
   temperatureCel: number;
-}
-
-@ObjectType()
-export class MintBannerOutput extends CoreOutput<boolean> {
-  @ResField(() => Boolean)
-  ok?: boolean;
 }

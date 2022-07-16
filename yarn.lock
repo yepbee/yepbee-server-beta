@@ -1701,17 +1701,17 @@
   dependencies:
     "@randlabs/communication-bridge" "^1.0.0"
 
-"@retrip/js@^0.0.40":
-  version "0.0.40"
-  resolved "https://registry.yarnpkg.com/@retrip/js/-/js-0.0.40.tgz#7fbb4c5ee193820eff7c7464b38436f0dfc2c3bd"
-  integrity sha512-4FOB5olPwGXPkzfp7f5Cdux8sR1zResc7M7WlBSJ4iaa3DOUv1XXceZgFDpbcymgxR5T+6wZsGopaJgu1EMl8g==
+"@retrip/js@^0.0.52":
+  version "0.0.52"
+  resolved "https://registry.yarnpkg.com/@retrip/js/-/js-0.0.52.tgz#8a00374010b2c968e8eb43c8c812f17f3858742d"
+  integrity sha512-LlOzFyKooBRfqckpmvtTyCOLNjK6cK9TuelKUF9w8bUQU0XSuFhv6q6aAG+DYtCqfEHz1VwEs+YHbPkvVvnkPA==
   dependencies:
     "@project-serum/anchor" "^0.24.2"
     "@solana/spl-token" "^0.2.0"
     "@solana/web3.js" "^1.41.10"
     base-x "^4.0.0"
     ethers "^5.6.6"
-    got "11.8.3"
+    got "11.8.5"
     h3-js "^3.7.2"
     randombytes "^2.1.0"
     tweetnacl "^1.0.3"
@@ -4629,23 +4629,6 @@ globby@^11.0.4:
     ignore "^5.2.0"
     merge2 "^1.4.1"
     slash "^3.0.0"
-
-got@11.8.3:
-  version "11.8.3"
-  resolved "https://registry.yarnpkg.com/got/-/got-11.8.3.tgz#f496c8fdda5d729a90b4905d2b07dbd148170770"
-  integrity sha512-7gtQ5KiPh1RtGS9/Jbv1ofDpBFuq42gyfEib+ejaRBJuj/3tQFeR5+gw57e4ipaU8c/rCjvX6fkQz2lyDlGAOg==
-  dependencies:
-    "@sindresorhus/is" "^4.0.0"
-    "@szmarczak/http-timer" "^4.0.5"
-    "@types/cacheable-request" "^6.0.1"
-    "@types/responselike" "^1.0.0"
-    cacheable-lookup "^5.0.3"
-    cacheable-request "^7.0.2"
-    decompress-response "^6.0.0"
-    http2-wrapper "^1.0.0-beta.5.2"
-    lowercase-keys "^2.0.0"
-    p-cancelable "^2.0.0"
-    responselike "^2.0.0"
 
 got@11.8.5:
   version "11.8.5"

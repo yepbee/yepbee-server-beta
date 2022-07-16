@@ -14,6 +14,7 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { AuthModule } from './auth/auth.module';
 import { EnvModule as _ } from './env/env.module';
 import { RtimeModule } from './rtime/rtime.module';
+import { TokenModule } from './token/token.module';
 import { UsersModule } from './users/users.module';
 import { User } from './users/entities/user.entity';
 import { AuthMiddleware } from './auth/auth.middleware';
@@ -31,9 +32,12 @@ import { ValidationModule } from './validation/validation.module';
 import { ValidProperty } from './users/entities/validProperty.entity';
 import { UserTokenAccounts } from './users/entities/userTokenAccounts.entity';
 import { InventoryModule } from './inventory/inventory.module';
-import { NftBanner } from './validation/entities/nftBanner.entity';
-import { BannerTag } from './validation/entities/bannerTag.entity';
+import { NftBanner } from './mint/entities/nftBanner.entity';
+import { BannerTag } from './mint/entities/bannerTag.entity';
 import { Transactions } from './users/entities/transactions.entity';
+import { StateModule } from './state/state.module';
+import { MintModule } from './mint/mint.module';
+import { AppResolver } from './app.resolver';
 
 @Module({
   imports: [
@@ -86,8 +90,10 @@ import { Transactions } from './users/entities/transactions.entity';
       },
       preservedTime: +_.ENVS.RTIME_DATABASE_PRESERVED_TIME,
     }),
+    TokenModule.forRoot(),
     UsersModule.forRoot(),
     AuthModule.forRoot(),
+    StateModule.forRoot(),
     Web3Module.forRoot({
       secretKey: Uint8Array.from(JSON.parse(_.ENVS.WEB3_MASTER_SECRET_KEY)),
       clusterApiUrl: _.ENVS.WEB3_CLUSTER_API_URL as Cluster,
@@ -103,16 +109,19 @@ import { Transactions } from './users/entities/transactions.entity';
       timeDistanceMinBoundary: +_.ENVS.VALIDATOR_TIME_DISTANCE_MIN_BOUNDARY,
       timeDistanceMaxBoundary: +_.ENVS.VALIDATOR_TIME_DISTANCE_MAX_BOUNDARY,
       rewardsOnedayMax: +_.ENVS.VALIDATOR_MAX_ONEDAY_REWARDS,
-      h3MintingResolution: +_.ENVS.H3_MINTING_RESOLUTION,
       rtrpPerHoneycon: +_.ENVS.SERVICE_RTRP_PER_HONEYCON,
-      rtrpPerMintingBanner: +_.ENVS.SERVICE_RTRP_PER_MINTING_BANNER,
     }),
     InventoryModule.forRoot({
       maxOutputLength: +_.ENVS.INVENTORY_MAX_OUTPUT_LENGTH,
     }),
+    MintModule.forRoot({
+      h3MintingResolution: +_.ENVS.H3_MINTING_RESOLUTION,
+      rtrpPerUploadingToArweave: +_.ENVS.SERVICE_RTRP_PER_UPLOADING_TO_ARWEAVE,
+      rtrpPerMintingBanner: +_.ENVS.SERVICE_RTRP_PER_MINTING_BANNER,
+    }),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, AppResolver],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
