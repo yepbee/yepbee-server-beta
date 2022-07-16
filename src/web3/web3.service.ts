@@ -6,12 +6,8 @@ import {
   getMasterEditionAddress,
   getMetadataAddress,
   getProgramTokenAccount,
-  MINT_ADDRESS,
-  PROGRAM_ID,
+  ACCOUNT_KEYS,
   PublicKey,
-  TOKEN_METADATA_PROGRAM_ID,
-  TOTALSUPPLY_ADDRESS,
-  WHITELIST_ADDRESS,
 } from '@retrip/js';
 import {
   CurrencyType,
@@ -35,7 +31,6 @@ import {
   Wallet,
 } from '@project-serum/anchor';
 import { RetripJs, IDL } from './idls/retrip_js';
-import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { SYSVAR_RENT_PUBKEY } from '@solana/web3.js';
 import * as anchor from '@project-serum/anchor';
 import { UserTokenAccounts } from 'src/users/entities/userTokenAccounts.entity';
@@ -51,9 +46,9 @@ import { Ok } from 'src/common/result/result.function';
 @Injectable()
 export class Web3Service {
   private readonly accountAddresses: AccountAddresses = {
-    mintPubkey: new PublicKey(MINT_ADDRESS),
-    whiteListPubkey: new PublicKey(WHITELIST_ADDRESS),
-    totalSupplyPubkey: new PublicKey(TOTALSUPPLY_ADDRESS),
+    mintPubkey: new PublicKey(ACCOUNT_KEYS.MINT_ADDRESS),
+    whiteListPubkey: new PublicKey(ACCOUNT_KEYS.WHITELIST_ADDRESS),
+    totalSupplyPubkey: new PublicKey(ACCOUNT_KEYS.TOTALSUPPLY_ADDRESS),
   };
   private readonly programTokenAccount: PublicKey = getProgramTokenAccount()[0];
   private readonly connection: web3.Connection;
@@ -89,7 +84,7 @@ export class Web3Service {
 
     this.program = new Program<RetripJs>(
       IDL,
-      PROGRAM_ID,
+      ACCOUNT_KEYS.PROGRAM_ID,
       new AnchorProvider(this.connection, new Wallet(this.keypair), {
         ...AnchorProvider.defaultOptions(),
         commitment: 'finalized',
@@ -159,7 +154,7 @@ export class Web3Service {
         payer: this.masterPubkey,
         userPubkey: userPubkey as PublicKey,
         whiteList: this.accountAddresses.whiteListPubkey,
-        tokenProgram: TOKEN_PROGRAM_ID,
+        tokenProgram: ACCOUNT_KEYS.TOKEN_PROGRAM_ID,
         rent: SYSVAR_RENT_PUBKEY,
         mint: this.accountAddresses.mintPubkey,
         programTokenAccount: this.programTokenAccount,
@@ -222,8 +217,8 @@ export class Web3Service {
       })
       .accounts({
         rent: SYSVAR_RENT_PUBKEY,
-        tokenProgram: TOKEN_PROGRAM_ID,
-        tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
+        tokenProgram: ACCOUNT_KEYS.TOKEN_PROGRAM_ID,
+        tokenMetadataProgram: ACCOUNT_KEYS.TOKEN_METADATA_PROGRAM_ID,
         whiteList: this.accountAddresses.whiteListPubkey,
         totalSupply: this.accountAddresses.totalSupplyPubkey,
         payer: this.masterPubkey,
@@ -255,7 +250,7 @@ export class Web3Service {
       .accounts({
         whiteList: this.accountAddresses.whiteListPubkey,
         payer: this.masterPubkey,
-        tokenProgram: TOKEN_PROGRAM_ID,
+        tokenProgram: ACCOUNT_KEYS.TOKEN_PROGRAM_ID,
         rent: SYSVAR_RENT_PUBKEY,
         mint: this.accountAddresses.mintPubkey,
         programTokenAccount: this.programTokenAccount,
@@ -279,7 +274,7 @@ export class Web3Service {
       .transferSystemNftToken()
       .accounts({
         rent: SYSVAR_RENT_PUBKEY,
-        tokenProgram: TOKEN_PROGRAM_ID,
+        tokenProgram: ACCOUNT_KEYS.TOKEN_PROGRAM_ID,
         whiteList: this.accountAddresses.whiteListPubkey,
         payer: this.masterPubkey,
         nftMint,
@@ -305,7 +300,7 @@ export class Web3Service {
         whiteList: this.accountAddresses.whiteListPubkey,
         payer: this.masterPubkey,
         payerTokenAccount: this.masterTokenAccount,
-        tokenProgram: TOKEN_PROGRAM_ID,
+        tokenProgram: ACCOUNT_KEYS.TOKEN_PROGRAM_ID,
         rent: SYSVAR_RENT_PUBKEY,
         mint: this.accountAddresses.mintPubkey,
         programTokenAccount: this.programTokenAccount,
