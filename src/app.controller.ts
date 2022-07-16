@@ -1,5 +1,5 @@
 import { Controller, Get, HttpStatus, Query } from '@nestjs/common';
-import { keypairToAuthToken, Keypair } from '@retrip/js';
+import { keypairToAuthToken, Keypair, AccountKeys } from '@retrip/js';
 import { AppService } from './app.service';
 import { GLOBAL_OPTIONS, RtimeId } from './common/constants';
 import { throwException } from './common/functions';
@@ -32,6 +32,11 @@ export class AppController {
   @Get()
   home(): string {
     return this.appService.welcome();
+  }
+
+  @Get('keys')
+  keys(): AccountKeys {
+    return this.appService.keys();
   }
 
   @Get('/pubkey')
