@@ -1701,10 +1701,10 @@
   dependencies:
     "@randlabs/communication-bridge" "^1.0.0"
 
-"@retrip/js@^0.0.46":
-  version "0.0.46"
-  resolved "https://registry.yarnpkg.com/@retrip/js/-/js-0.0.46.tgz#4d7fe5229d7343e468a436e294cd85cdcef4773c"
-  integrity sha512-i6nI0EtFU+JvJ4n4zeVcitKIwHhaotD3fFnbLSwEYAb6YIVx3KD6B+G3GyiWa9krkwD8Dw1tC85wVdtBMdW0aQ==
+"@retrip/js@^0.0.47":
+  version "0.0.47"
+  resolved "https://registry.yarnpkg.com/@retrip/js/-/js-0.0.47.tgz#3dcfe783adb34a216cd2935f0cde0bff1e26e125"
+  integrity sha512-1GkL1IAEx7HAn60ERV5QP1cxAFXIZzic53mqqpTZTFn1kXFrWIi6WcUJPNwpzbQSIcDF0hgRJFvrj02FDx3KUQ==
   dependencies:
     "@project-serum/anchor" "^0.24.2"
     "@solana/spl-token" "^0.2.0"
