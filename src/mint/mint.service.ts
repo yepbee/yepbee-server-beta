@@ -20,7 +20,7 @@ import {
   getTokenBalance,
   Metadata,
   parseBannerMetadata,
-  PROGRAM_ID,
+  ACCOUNT_KEYS,
   Weather,
 } from '@retrip/js';
 import { isContentType } from 'src/common/functions';
@@ -204,7 +204,7 @@ export class MintService {
       },
       {
         name: 'Token-Type',
-        value: `payload/${PROGRAM_ID}/banner-v1`,
+        value: `payload/${ACCOUNT_KEYS.PROGRAM_ID}/banner-v1`,
       },
       {
         name: 'Token-Id',
@@ -265,7 +265,7 @@ export class MintService {
         tags.map((v) => ({ trait_type: '', value: v.value })),
       );
 
-      arweaveTags[1].value = `metadata/${PROGRAM_ID}/banner-v1`; // change to metadata type
+      arweaveTags[1].value = `metadata/${ACCOUNT_KEYS.PROGRAM_ID}/banner-v1`; // change to metadata type
 
       const metadataArweaveId = await this.web3Service.uploadToBundlr(
         JSON.stringify(metadata),
