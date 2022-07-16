@@ -23,7 +23,7 @@ export class AppService {
   ) {}
 
   welcome(): string {
-    return 'Welcome To Retrip!';
+    return 'Welcome To Retrip! 2022.7.16 17:13';
   }
 
   async rtime(id: RtimeId): Promise<string> {

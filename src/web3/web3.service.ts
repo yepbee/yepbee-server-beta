@@ -13,7 +13,12 @@ import {
   TOTALSUPPLY_ADDRESS,
   WHITELIST_ADDRESS,
 } from '@retrip/js';
-import { KEY_OPTIONS, web3 } from 'src/common/constants';
+import {
+  CurrencyType,
+  KEY_OPTIONS,
+  web3,
+  TransactionType,
+} from 'src/common/constants';
 import {
   AccountAddresses,
   ArweaveURL,
@@ -38,6 +43,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import Bundlr from '@bundlr-network/client';
 import { ContentType } from 'src/common/interfaces';
+import { User } from 'src/users/entities/user.entity';
+import { Transactions } from 'src/users/entities/transactions.entity';
+import { AsyncTryCatch } from 'src/common/decorators';
+import { StringOutput } from 'src/common/dtos';
+import { Ok } from 'src/common/result/result.function';
 @Injectable()
 export class Web3Service {
   private readonly accountAddresses: AccountAddresses = {
@@ -49,13 +59,21 @@ export class Web3Service {
   private readonly connection: web3.Connection;
   private readonly keypair: web3.Keypair;
   readonly masterPubkey: PublicKey;
+  get masterPubkeyString(): string {
+    return this.masterPubkey.toString();
+  }
   readonly masterTokenAccount: PublicKey;
+  get masterTokenAccountString(): string {
+    return this.masterTokenAccount.toString();
+  }
   readonly program: Program<RetripJs>;
   private readonly bundlr: Bundlr;
   constructor(
     @Inject(KEY_OPTIONS) private readonly options: Web3ModuleOptions,
     @InjectRepository(UserTokenAccounts)
     private readonly userTokenAccountssRepository: Repository<UserTokenAccounts>,
+    @InjectRepository(Transactions)
+    private readonly transactionsRepository: Repository<Transactions>,
   ) {
     const apiUrl = this.options.clusterApiUrl;
 
@@ -280,7 +298,7 @@ export class Web3Service {
       .rpc();
   }
   // for test
-  faucet() {
+  faucetMaster() {
     return this.program.methods
       .faucet()
       .accounts({
@@ -294,5 +312,40 @@ export class Web3Service {
       })
       .signers([this.keypair])
       .rpc();
+  }
+
+  @AsyncTryCatch()
+  async faucet(user: User): Promise<StringOutput> {
+    const amount = 4;
+    const {
+      validProperty: { internalTokenAccounts: { tokenAccount } = {} } = {},
+    } = user;
+
+    // double check: valid user
+    if (!tokenAccount) throw new Error(`Forbidden user request`);
+
+    const creatorTokenAccountPubkey = this.newPublicKey(tokenAccount);
+
+    const txhash = await this.transferSystemToken(
+      creatorTokenAccountPubkey,
+      amount,
+      this.masterPubkey,
+      this.masterTokenAccount,
+    );
+
+    console.log('recording the transaction...');
+    const tx = this.transactionsRepository.create({
+      owner: user,
+      currency: CurrencyType.RTRP,
+      txhash,
+      from: this.masterPubkeyString,
+      to: user.pubkey,
+      amount,
+      type: TransactionType.System,
+    });
+
+    await this.transactionsRepository.save(tx);
+
+    return Ok(txhash);
   }
 }

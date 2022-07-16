@@ -8,7 +8,7 @@ import { User } from './entities/user.entity';
 import { MailService } from '../mail/mail.service';
 import { Verification } from './entities/verification.entity';
 import { EnvService } from 'src/env/env.service';
-import { bs58 } from 'src/common/constants';
+import { bs58, CurrencyType, TransactionType } from 'src/common/constants';
 import { RtimeService } from 'src/rtime/rtime.service';
 import { EditProfileInput, EditProfileOutput } from './dtos/editProfile.dto';
 import {
@@ -17,11 +17,7 @@ import {
 } from './dtos/signupChainUser.dto';
 import { Web3Service } from 'src/web3/web3.service';
 import { ValidProperty } from './entities/validProperty.entity';
-import {
-  CurrencyType,
-  Transactions,
-  TransactionType,
-} from './entities/transactions.entity';
+import { Transactions } from './entities/transactions.entity';
 import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 
 @Injectable()

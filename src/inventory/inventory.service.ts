@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { kRing } from 'h3-js';
 import { AsyncTryCatch } from 'src/common/decorators';
 import { Ok } from 'src/common/result/result.function';
-import { NftBanner } from 'src/validation/entities/nftBanner.entity';
+import { NftBanner } from 'src/mint/entities/nftBanner.entity';
 import { Between, FindOptionsWhere, Repository } from 'typeorm';
 import { GetBannersInput, GetBannersOutput } from './dtos/getBanners.dto';
 import {
@@ -54,7 +54,8 @@ export class InventoryService {
     latitude,
     longitude,
     radiusM,
-  }: GetBannersByRingInput): Promise<GetBannersByRingOutput> {
+  }: // maxCount = 20, * by likes
+  GetBannersByRingInput): Promise<GetBannersByRingOutput> {
     const latLng = { latitude, longitude };
     const abs = Math.abs;
     const latUp = abs(

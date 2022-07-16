@@ -13,6 +13,7 @@ import { InputType, ObjectType, Field } from '@nestjs/graphql';
 import { IsWalletPublicKey } from 'src/common/validators';
 import {
   IsEmail,
+  IsEnum,
   IsString,
   IsUrl,
   Length,
@@ -21,8 +22,9 @@ import {
 import { nanoid } from 'nanoid';
 import { ValidProperty } from './validProperty.entity';
 import { RTIME_LENGTH } from 'src/rtime/rtime.constant';
-import { NftBanner } from 'src/validation/entities/nftBanner.entity';
+import { NftBanner } from 'src/mint/entities/nftBanner.entity';
 import { Transactions } from './transactions.entity';
+import { AuthUserState } from 'src/common/constants';
 
 @InputType('UserInput')
 @ObjectType()
@@ -39,6 +41,16 @@ export class User extends CoreEntity {
   @OneToOne(() => ValidProperty, { eager: true, cascade: true })
   @JoinColumn({ name: 'validProperty' })
   validProperty?: ValidProperty; // joined dapp peer
+
+  @Column({ type: 'enum', enum: AuthUserState, default: AuthUserState.None })
+  @Field(() => AuthUserState)
+  @IsEnum(AuthUserState)
+  state: AuthUserState;
+
+  @Column({ nullable: true, default: '' })
+  @Field(() => String)
+  @IsString()
+  stateValue: string;
 
   @Field(() => String)
   @IsWalletPublicKey()

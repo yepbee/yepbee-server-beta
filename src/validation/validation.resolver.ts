@@ -6,7 +6,6 @@ import {
   EnqueueValidatingInput,
   EnqueueValidatingOutput,
 } from './dtos/enqueueValidating.dto';
-import { MintBannerInput, MintBannerOutput } from './dtos/mintBanner.dto';
 import { ValidationService } from './validation.service';
 
 @Resolver()
@@ -23,14 +22,5 @@ export class ValidationResolver {
       user,
       enqueueValidatingInput,
     );
-  }
-
-  @Mutation(() => MintBannerOutput)
-  @Allow(['ValidUser'])
-  mintBanner(
-    @AuthUser() user: User,
-    @Args() mintBannerInput: MintBannerInput,
-  ): Promise<MintBannerOutput> {
-    return this.validationsServise.mintBanner(user, mintBannerInput);
   }
 }

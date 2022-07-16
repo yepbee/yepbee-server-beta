@@ -8,3 +8,8 @@ export abstract class CoreOutput<Ok> implements Result<Ok, string> {
   @ResField(() => String)
   error?: string;
 }
+@ObjectType()
+export abstract class StringOutput extends CoreOutput<string> {
+  @ResField(() => String)
+  ok?: string;
+}
