@@ -41,7 +41,7 @@ export class MintResolver {
 
   @Mutation(() => NewStateOutput)
   @Allow(['ValidUser'])
-  @AllowUserState(['UploadingToArweave', 'MintingBanner'])
+  @AllowUserState(['UploadingToArweave'])
   cancelMinting(@AuthUser() user: User): Promise<NewStateOutput> {
     return this.mintsServise.cancelMinting(user);
   }

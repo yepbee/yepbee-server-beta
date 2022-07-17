@@ -36,6 +36,7 @@ import { NewStateOutput } from './dtos/common.dto';
 import { CoreOutput } from 'src/common/dtos';
 import { UploadToArweaveInput } from './dtos/uploadToArweave.dto';
 import got from 'got';
+import { MintingResult } from 'src/web3/web3.interface';
 
 @Injectable()
 export class MintService {
@@ -333,8 +334,9 @@ export class MintService {
       console.error("couldn't record the transaction", e);
     }
 
+    let mintingResult: MintingResult;
     try {
-      const mintingResult = await this.web3Service.mintNFT(
+      mintingResult = await this.web3Service.mintNFT(
         creatorPubkey,
         metadataUrl,
         data.name,
@@ -373,6 +375,28 @@ export class MintService {
 
       throw e;
     }
+
+    // const parsedMetadata = parseBannerMetadata(data);
+
+    // console.log('saving into our database..', parsedMetadata);
+    // const banner = this.nftBannersRepository.create({
+    //   ...parsedMetadata,
+    //   creatorUser: user,
+    //   ownerUser: user,
+    //   mintKey: mintingResult.mintKey.toString(),
+    //   txhash: mintingResult.txhash,
+    //   metadataUrl,
+    // });
+
+    // await this.nftBannersRepository.save(banner);
+    // user.ownedBanners.push(banner);
+    // user.createdBanners.push(banner);
+
+    // const newState = AuthUserState.None;
+    // const stateValue = '';
+    // await this.stateService.next(user.state, newState, user, stateValue); // to initial
+
+    // return Ok({ newState, stateValue });
   }
 
   @AsyncTryCatch()
@@ -409,7 +433,7 @@ export class MintService {
   }
 
   @AsyncTryCatch()
-  @AllowUserState(['UploadingToArweave', 'MintingBanner'])
+  @AllowUserState(['UploadingToArweave'])
   async cancelMinting(user: User): Promise<NewStateOutput> {
     console.log('cancelMinting', user);
     let paybackCost: number;
