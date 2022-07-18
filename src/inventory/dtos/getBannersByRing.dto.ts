@@ -4,7 +4,7 @@ import { H3_WALKING_RESOLUTION } from 'src/common/constants';
 import { CoreOutput } from 'src/common/dtos';
 import { ResField } from 'src/common/result/result.decorator';
 import { IsH3Index } from 'src/common/validators';
-import { NftBanner } from 'src/mint/entities/nftBanner.entity';
+import { NftBanner } from 'src/nft/mint/entities/nftBanner.entity';
 
 @ArgsType()
 export class GetBannersByH3RingInput {

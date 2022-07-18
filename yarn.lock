@@ -1701,10 +1701,10 @@
   dependencies:
     "@randlabs/communication-bridge" "^1.0.0"
 
-"@retrip/js@^0.0.52":
-  version "0.0.52"
-  resolved "https://registry.yarnpkg.com/@retrip/js/-/js-0.0.52.tgz#8a00374010b2c968e8eb43c8c812f17f3858742d"
-  integrity sha512-LlOzFyKooBRfqckpmvtTyCOLNjK6cK9TuelKUF9w8bUQU0XSuFhv6q6aAG+DYtCqfEHz1VwEs+YHbPkvVvnkPA==
+"@retrip/js@^0.0.53":
+  version "0.0.53"
+  resolved "https://registry.yarnpkg.com/@retrip/js/-/js-0.0.53.tgz#8828e2097f8ef3325d66528008ba2ed490f51025"
+  integrity sha512-zvBt++4JDmhrR7krr/oH+j5JbxvV1/tHEUEkMhWBDCrnK0ukB5ctwKffa+s9Z/9/xrkUcww4FtfdDEOnu0wuuA==
   dependencies:
     "@project-serum/anchor" "^0.24.2"
     "@solana/spl-token" "^0.2.0"
@@ -1913,6 +1913,13 @@
   integrity sha512-kVzjari1s2YVi77D3w1yuvohV2idweYXMCDzqBiVNN63TcDWrIlTVOYpqVrvbbyOE/IyzBoTKF0fdnLPEORFxA==
   dependencies:
     "@babel/types" "^7.3.0"
+
+"@types/bn.js@^5.1.0":
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/@types/bn.js/-/bn.js-5.1.0.tgz#32c5d271503a12653c62cf4d2b45e6eab8cebc68"
+  integrity sha512-QSSVYj7pYFN49kW77o2s9xTCwZ8F2xLbjLLSEVh8D2F4JUhZtPAGOFLTD+ffqksBx/u4cE/KImFjyhqCjn/LIA==
+  dependencies:
+    "@types/node" "*"
 
 "@types/body-parser@*", "@types/body-parser@1.19.2":
   version "1.19.2"

@@ -8,6 +8,9 @@ import {
   getProgramTokenAccount,
   ACCOUNT_KEYS,
   PublicKey,
+  findNftAddress,
+  findNftByUserAddress,
+  getTokenBalance,
 } from '@retrip/js';
 import {
   CurrencyType,
@@ -106,6 +109,9 @@ export class Web3Service {
   }
   newPublicKey(pubkey: string): PublicKey {
     return new PublicKey(pubkey);
+  }
+  newPublicKeys(...pubkeys: string[]): PublicKey[] {
+    return pubkeys.map((pubkey: string) => new PublicKey(pubkey));
   }
   newTransactionInstruction(opts: web3.TransactionInstructionCtorFields) {
     return new web3.TransactionInstruction(opts);
@@ -293,7 +299,7 @@ export class Web3Service {
       .rpc();
   }
   // for test
-  faucetMaster() {
+  faucetMaster(): Promise<string> {
     return this.program.methods
       .faucet()
       .accounts({
@@ -342,5 +348,102 @@ export class Web3Service {
     await this.transactionsRepository.save(tx);
 
     return Ok(txhash);
+  }
+
+  likeNFT(
+    userPubicKey: PublicKey,
+    mintKeyPublicKey: PublicKey,
+  ): Promise<string> {
+    const [nft] = findNftAddress(mintKeyPublicKey);
+    const [nftByUser] = findNftByUserAddress(mintKeyPublicKey, userPubicKey);
+    return this.program.methods
+      .likeNftAsWhitelist(mintKeyPublicKey)
+      .accounts({
+        rent: SYSVAR_RENT_PUBKEY,
+        tokenProgram: ACCOUNT_KEYS.TOKEN_PROGRAM_ID,
+        whiteList: this.accountAddresses.whiteListPubkey,
+        payer: this.masterPubkey,
+        nft,
+        nftByUser,
+      })
+      .signers([this.keypair])
+      .rpc();
+  }
+
+  fetchNft(mintKeyPublicKey: PublicKey) {
+    const [nft] = findNftAddress(mintKeyPublicKey);
+    return this.program.account.nft.fetch(nft);
+  }
+
+  async getBalance(user: User): Promise<number> {
+    const {
+      validProperty: { internalTokenAccounts: { tokenAccount } = {} } = {},
+    } = user;
+
+    // double check: valid user
+    if (!tokenAccount) throw new Error(`Forbidden user request`);
+    const creatorTokenAccountPubkey = this.newPublicKey(tokenAccount);
+
+    return await getTokenBalance(creatorTokenAccountPubkey);
+  }
+
+  pay(user: User, amount: number): Promise<string> {
+    const {
+      validProperty: { internalTokenAccounts: { tokenAccount } = {} } = {},
+      pubkey,
+    } = user;
+
+    // double check: valid user
+    if (!tokenAccount) throw new Error(`Forbidden user request`);
+
+    const creatorPubkey = this.newPublicKey(pubkey);
+    const creatorTokenAccountPubkey = this.newPublicKey(tokenAccount);
+
+    return this.transferSystemToken(
+      this.masterTokenAccount,
+      amount,
+      creatorPubkey,
+      creatorTokenAccountPubkey,
+    );
+  }
+
+  payback(user: User, amount: number): Promise<string> {
+    const {
+      validProperty: { internalTokenAccounts: { tokenAccount } = {} } = {},
+    } = user;
+
+    // double check: valid user
+    if (!tokenAccount) throw new Error(`Forbidden user request`);
+
+    const creatorTokenAccountPubkey = this.newPublicKey(tokenAccount);
+
+    return this.transferSystemToken(
+      creatorTokenAccountPubkey,
+      amount,
+      this.masterPubkey,
+      this.masterTokenAccount,
+    );
+  }
+
+  async recordingTransaction(
+    user: User,
+    txhash: string,
+    from: string,
+    to: string,
+    amount: number,
+    type: TransactionType,
+  ) {
+    console.log('recording the transaction...');
+    const tx = this.transactionsRepository.create({
+      owner: user,
+      currency: CurrencyType.RTRP,
+      txhash,
+      from,
+      to,
+      amount,
+      type,
+    });
+    await this.transactionsRepository.save(tx);
+    user.transactions.push(tx);
   }
 }

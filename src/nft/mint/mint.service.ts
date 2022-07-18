@@ -2,7 +2,6 @@ import { Inject, Injectable } from '@nestjs/common';
 import {
   AuthUserState,
   contentTypes,
-  CurrencyType,
   KEY_OPTIONS,
   TransactionType,
 } from 'src/common/constants';
@@ -17,7 +16,6 @@ import { EnvService } from 'src/env/env.service';
 import {
   ArweaveURL,
   createBannerMetadata,
-  getTokenBalance,
   Metadata,
   parseBannerMetadata,
   ACCOUNT_KEYS,
@@ -30,12 +28,12 @@ import { NftBanner } from './entities/nftBanner.entity';
 import { Repository } from 'typeorm';
 import { BannerTag } from './entities/bannerTag.entity';
 import { Transactions } from 'src/users/entities/transactions.entity';
-import { StateService } from '../state/state.service';
+import { StateService } from '../../state/state.service';
 import { AllowUserState } from 'src/auth/allow.decorator';
 import { NewStateOutput } from './dtos/common.dto';
-import { CoreOutput } from 'src/common/dtos';
 import { UploadToArweaveInput } from './dtos/uploadToArweave.dto';
 import got from 'got';
+import { MintingResult } from 'src/web3/web3.interface';
 
 @Injectable()
 export class MintService {
@@ -65,84 +63,6 @@ export class MintService {
     this.TEMPERATURE_MIN = -99.0;
     this.TEMPERATURE_MAX = 99.0;
   }
-
-  @AsyncTryCatch()
-  private async getBalance(user: User): Promise<CoreOutput<number>> {
-    const {
-      validProperty: { internalTokenAccounts: { tokenAccount } = {} } = {},
-    } = user;
-
-    // double check: valid user
-    if (!tokenAccount) return Err(`Forbidden user request`);
-    const creatorTokenAccountPubkey =
-      this.web3Service.newPublicKey(tokenAccount);
-
-    return Ok(await getTokenBalance(creatorTokenAccountPubkey));
-  }
-
-  private pay(user: User, amount: number): Promise<string> {
-    const {
-      validProperty: { internalTokenAccounts: { tokenAccount } = {} } = {},
-      pubkey,
-    } = user;
-
-    // double check: valid user
-    if (!tokenAccount) throw new Error(`Forbidden user request`);
-
-    const creatorPubkey = this.web3Service.newPublicKey(pubkey);
-    const creatorTokenAccountPubkey =
-      this.web3Service.newPublicKey(tokenAccount);
-
-    return this.web3Service.transferSystemToken(
-      this.web3Service.masterTokenAccount,
-      amount,
-      creatorPubkey,
-      creatorTokenAccountPubkey,
-    );
-  }
-
-  private payback(user: User, amount: number): Promise<string> {
-    const {
-      validProperty: { internalTokenAccounts: { tokenAccount } = {} } = {},
-    } = user;
-
-    // double check: valid user
-    if (!tokenAccount) throw new Error(`Forbidden user request`);
-
-    const creatorTokenAccountPubkey =
-      this.web3Service.newPublicKey(tokenAccount);
-
-    return this.web3Service.transferSystemToken(
-      creatorTokenAccountPubkey,
-      amount,
-      this.web3Service.masterPubkey,
-      this.web3Service.masterTokenAccount,
-    );
-  }
-
-  private async recordingTransaction(
-    user: User,
-    txhash: string,
-    from: string,
-    to: string,
-    amount: number,
-    type: TransactionType,
-  ) {
-    console.log('recording the transaction...');
-    const tx = this.transactionsRepository.create({
-      owner: user,
-      currency: CurrencyType.RTRP,
-      txhash,
-      from,
-      to,
-      amount,
-      type,
-    });
-    await this.transactionsRepository.save(tx);
-    user.transactions.push(tx);
-  }
-
-  // -------------------------
 
   @AsyncTryCatch()
   @AllowUserState(['None'])
@@ -176,7 +96,7 @@ export class MintService {
         `Invalid temperatrue range ${this.TEMPERATURE_MIN} <= ${temperatureCel} <= ${this.TEMPERATURE_MAX}`,
       );
 
-    const creatorBalance = await this.getBalance(user);
+    const creatorBalance = await this.web3Service.getBalance(user);
 
     if (creatorBalance < this.RTRP_PER_MINTING_BANNER)
       return Err(
@@ -223,9 +143,12 @@ export class MintService {
       },
     ];
 
-    const txhash = await this.pay(user, this.RTRP_PER_UPLOADING_ARWEAVE);
+    const txhash = await this.web3Service.pay(
+      user,
+      this.RTRP_PER_UPLOADING_ARWEAVE,
+    );
     try {
-      await this.recordingTransaction(
+      await this.web3Service.recordingTransaction(
         user,
         txhash,
         user.pubkey,
@@ -276,17 +199,17 @@ export class MintService {
       metadataUrl = this.web3Service.toArweaveBaseUrl(metadataArweaveId);
     } catch (e) {
       // --------------- catch ---------------
-      const txhash = await this.payback(
+      const txhash = await this.web3Service.payback(
         user,
-        this.RTRP_PER_UPLOADING_ARWEAVE * 0.8,
+        this.RTRP_PER_UPLOADING_ARWEAVE * 0.5,
       ); // 80% back
       try {
-        await this.recordingTransaction(
+        await this.web3Service.recordingTransaction(
           user,
           txhash,
           this.web3Service.masterPubkeyString,
           user.pubkey,
-          this.RTRP_PER_UPLOADING_ARWEAVE * 0.8,
+          this.RTRP_PER_UPLOADING_ARWEAVE * 0.5,
           TransactionType.Upload,
         );
       } catch (e) {
@@ -319,9 +242,12 @@ export class MintService {
     if (typeof data !== 'object' || !data.name)
       return Err(`invalid metadataUrl`);
 
-    const txhash = await this.pay(user, this.RTRP_PER_MINTING_BANNER);
+    const txhash = await this.web3Service.pay(
+      user,
+      this.RTRP_PER_MINTING_BANNER,
+    );
     try {
-      await this.recordingTransaction(
+      await this.web3Service.recordingTransaction(
         user,
         txhash,
         user.pubkey,
@@ -333,8 +259,9 @@ export class MintService {
       console.error("couldn't record the transaction", e);
     }
 
+    let mintingResult: MintingResult;
     try {
-      const mintingResult = await this.web3Service.mintNFT(
+      mintingResult = await this.web3Service.mintNFT(
         creatorPubkey,
         metadataUrl,
         data.name,
@@ -354,17 +281,17 @@ export class MintService {
         stateValue,
       });
     } catch (e) {
-      const txhash = await this.payback(
+      const txhash = await this.web3Service.payback(
         user,
-        this.RTRP_PER_MINTING_BANNER * 0.8,
+        this.RTRP_PER_MINTING_BANNER * 0.5,
       );
       try {
-        await this.recordingTransaction(
+        await this.web3Service.recordingTransaction(
           user,
           txhash,
           this.web3Service.masterPubkeyString,
           user.pubkey,
-          this.RTRP_PER_MINTING_BANNER * 0.8,
+          this.RTRP_PER_MINTING_BANNER * 0.5,
           TransactionType.Mint,
         );
       } catch (e) {
@@ -409,6 +336,7 @@ export class MintService {
   }
 
   @AsyncTryCatch()
+  // @AllowUserState(['UploadingToArweave'])
   @AllowUserState(['UploadingToArweave', 'MintingBanner'])
   async cancelMinting(user: User): Promise<NewStateOutput> {
     console.log('cancelMinting', user);
@@ -434,14 +362,14 @@ export class MintService {
       throw new Error(`couldn't change the state ${newState}`);
     }
 
-    const txhash = await this.payback(user, paybackCost * 0.8); // 80% payback
+    const txhash = await this.web3Service.payback(user, paybackCost * 0.5); // 80% payback
     try {
-      await this.recordingTransaction(
+      await this.web3Service.recordingTransaction(
         user,
         txhash,
         this.web3Service.masterPubkeyString,
         user.pubkey,
-        paybackCost * 0.8,
+        paybackCost * 0.5,
         TransactionType.System,
       );
     } catch (e) {
@@ -450,203 +378,4 @@ export class MintService {
 
     return Ok({ newState, stateValue });
   }
-  // // version 1
-  // @AsyncTryCatch()
-  // async mintBanner(
-  //   user: User,
-  //   {
-  //     file,
-  //     description,
-  //     tags,
-  //     location: { latitude, longitude },
-  //     weather,
-  //     temperatureCel,
-  //   }: MintBannerInput,
-  // ): Promise<MintBannerOutput> {
-  //   const VERSION = 1;
-  //   const tokenId = 1; // for test (temporary)
-  //   const { mimetype, createReadStream } = await file;
-  //   // check mime-type
-  //   if (isContentType(mimetype, { omit: ['application/json'] }) === false)
-  //     return Err(
-  //       `Invalid mime-type ${mimetype}. the mime-type should be in the ${Object.keys(
-  //         contentTypes,
-  //       ).filter((v: ContentType) => v !== 'application/json')}`,
-  //     );
-
-  //   if (
-  //     temperatureCel < this.TEMPERATURE_MIN ||
-  //     temperatureCel > this.TEMPERATURE_MAX
-  //   )
-  //     return Err(
-  //       `Invalid temperatrue range ${this.TEMPERATURE_MIN} <= ${temperatureCel} <= ${this.TEMPERATURE_MAX}`,
-  //     );
-
-  //   const {
-  //     validProperty: { internalTokenAccounts: { tokenAccount } = {} } = {},
-  //     pubkey,
-  //   } = user;
-
-  //   // double check: valid user
-  //   if (!tokenAccount) return Err(`Forbidden user request`);
-
-  //   const creatorPubkey = this.web3Service.newPublicKey(pubkey);
-  //   const creatorTokenAccountPubkey =
-  //     this.web3Service.newPublicKey(tokenAccount);
-
-  //   const creatorBalance = await getTokenBalance(creatorTokenAccountPubkey);
-
-  //   if (creatorBalance < this.RTRP_PER_MINTING_BANNER)
-  //     return Err(
-  //       `Insufficient token balance : ${creatorBalance} should be more than ${this.RTRP_PER_MINTING_BANNER}`,
-  //     );
-
-  //   const chunks = [];
-
-  //   for await (const chunk of createReadStream()) {
-  //     chunks.push(chunk);
-  //   }
-
-  //   const buffer = Buffer.concat(chunks);
-
-  //   const h3 = geoToH3(latitude, longitude, this.MINTING_RESOLUTION);
-
-  //   // **** WARNING ****
-  //   // location data can be modified by hacking
-  //   // *****************
-
-  //   const txhash = await this.web3Service.transferSystemToken(
-  //     this.web3Service.masterTokenAccount,
-  //     this.RTRP_PER_MINTING_BANNER,
-  //     creatorPubkey,
-  //     creatorTokenAccountPubkey,
-  //   ); // extort
-
-  //   let mintingResult: MintingResult,
-  //     imageUrl: ArweaveURL,
-  //     metadataUrl: ArweaveURL;
-
-  //   try {
-  //     const arweaveTags = [
-  //       {
-  //         name: 'Token-Address',
-  //         value: `sol/${user.pubkey}`,
-  //       },
-  //       {
-  //         name: 'Token-Type',
-  //         value: `payload/${PROGRAM_ID}/banner-v1`,
-  //       },
-  //       {
-  //         name: 'Token-Id',
-  //         value: `${tokenId}`,
-  //       },
-  //       {
-  //         name: 'Token-JSON',
-  //         value: JSON.stringify({
-  //           h3Position: h3,
-  //           latitude,
-  //           longitude,
-  //           resolution: this.MINTING_RESOLUTION,
-  //           weather: Weather[weather],
-  //           temperatureCel,
-  //         }),
-  //       },
-  //     ];
-
-  //     const imageArweaveId = await this.web3Service.uploadToBundlr(
-  //       buffer,
-  //       mimetype as ContentType,
-  //       arweaveTags,
-  //     );
-
-  //     imageUrl = this.web3Service.toArweaveBaseUrl(imageArweaveId);
-
-  //     const metadata = createBannerMetadata(
-  //       creatorPubkey,
-  //       VERSION,
-  //       1,
-  //       {
-  //         latitude,
-  //         longitude,
-  //         resolution: this.MINTING_RESOLUTION,
-  //       },
-  //       imageUrl,
-  //       description,
-  //       weather,
-  //       temperatureCel,
-  //       tags.map((v) => ({ trait_type: '', value: v.value })),
-  //     );
-
-  //     arweaveTags[1].value = `metadata/${PROGRAM_ID}/banner-v1`; // change to metadata type
-
-  //     const metadataArweaveId = await this.web3Service.uploadToBundlr(
-  //       JSON.stringify(metadata),
-  //       'application/json',
-  //       arweaveTags,
-  //     );
-
-  //     metadataUrl = this.web3Service.toArweaveBaseUrl(metadataArweaveId);
-
-  //     // const creatorNftTokenAccount = await this.web3Service.findNftTokenAccount(
-  //     //   creatorPubkey,
-  //     // );
-
-  //     console.log('minting....');
-  //     mintingResult = await this.web3Service.mintNFT(
-  //       creatorPubkey,
-  //       metadataUrl,
-  //       metadata.name,
-  //       'rtb1',
-  //       'banner',
-  //     );
-  //     // console.log('transfering....');
-  //     // await this.web3Service.transferSystemNftToken(creatorNftTokenAccount);
-  //     console.log('succeed');
-  //   } catch (e) {
-  //     await this.web3Service.transferSystemToken(
-  //       creatorTokenAccountPubkey,
-  //       this.RTRP_PER_MINTING_BANNER * 0.5, // 70% back
-  //       this.web3Service.masterPubkey,
-  //       this.web3Service.masterTokenAccount,
-  //     ); // money back
-
-  //     throw e;
-  //   }
-
-  //   console.log('recording the transaction...');
-  //   const tx = this.transactionsRepository.create({
-  //     owner: user,
-  //     currency: CurrencyType.RTRP,
-  //     txhash,
-  //     from: pubkey,
-  //     to: this.web3Service.masterPubkey.toString(),
-  //     amount: this.RTRP_PER_MINTING_BANNER,
-  //     type: TransactionType.Mint,
-  //   });
-
-  //   await this.transactionsRepository.save(tx);
-
-  //   console.log('saving into our database..');
-  //   const banner = this.nftBannersRepository.create({
-  //     creatorUser: user,
-  //     ownerUser: user,
-  //     mintKey: mintingResult.mintKey.toString(),
-  //     txhash: mintingResult.txhash,
-  //     version: VERSION,
-  //     tokenId, // temporary
-  //     symbol: TokenSymbol.rtb1,
-  //     latitude,
-  //     longitude,
-  //     weather,
-  //     temperatureCel,
-  //     tags,
-  //     description,
-  //     metadataUrl,
-  //     imageUrl,
-  //   });
-
-  //   await this.nftBannersRepository.save(banner);
-
-  //   return Ok(true);
-  // }
 }

@@ -70,6 +70,7 @@ export enum TransactionType {
   Reward,
   Upload,
   Mint,
+  Like,
   Withdraw,
   System,
   Unknown,
