@@ -336,7 +336,8 @@ export class MintService {
   }
 
   @AsyncTryCatch()
-  @AllowUserState(['UploadingToArweave'])
+  // @AllowUserState(['UploadingToArweave'])
+  @AllowUserState(['UploadingToArweave', 'MintingBanner'])
   async cancelMinting(user: User): Promise<NewStateOutput> {
     console.log('cancelMinting', user);
     let paybackCost: number;
