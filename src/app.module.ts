@@ -32,12 +32,13 @@ import { ValidationModule } from './validation/validation.module';
 import { ValidProperty } from './users/entities/validProperty.entity';
 import { UserTokenAccounts } from './users/entities/userTokenAccounts.entity';
 import { InventoryModule } from './inventory/inventory.module';
-import { NftBanner } from './mint/entities/nftBanner.entity';
-import { BannerTag } from './mint/entities/bannerTag.entity';
+import { NftBanner } from './nft/mint/entities/nftBanner.entity';
+import { BannerTag } from './nft/mint/entities/bannerTag.entity';
 import { Transactions } from './users/entities/transactions.entity';
 import { StateModule } from './state/state.module';
-import { MintModule } from './mint/mint.module';
+import { MintModule } from './nft/mint/mint.module';
 import { AppResolver } from './app.resolver';
+import { NftModule } from './nft/nft.module';
 
 @Module({
   imports: [
@@ -118,6 +119,9 @@ import { AppResolver } from './app.resolver';
       h3MintingResolution: +_.ENVS.H3_MINTING_RESOLUTION,
       rtrpPerUploadingToArweave: +_.ENVS.SERVICE_RTRP_PER_UPLOADING_TO_ARWEAVE,
       rtrpPerMintingBanner: +_.ENVS.SERVICE_RTRP_PER_MINTING_BANNER,
+    }),
+    NftModule.forRoot({
+      rtrpPerLikingBanner: +_.ENVS.SERVICE_RTRP_PER_LIKING_BANNER,
     }),
   ],
   controllers: [AppController],

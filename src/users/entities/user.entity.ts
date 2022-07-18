@@ -22,7 +22,7 @@ import {
 import { nanoid } from 'nanoid';
 import { ValidProperty } from './validProperty.entity';
 import { RTIME_LENGTH } from 'src/rtime/rtime.constant';
-import { NftBanner } from 'src/mint/entities/nftBanner.entity';
+import { NftBanner } from 'src/nft/mint/entities/nftBanner.entity';
 import { Transactions } from './transactions.entity';
 import { AuthUserState } from 'src/common/constants';
 

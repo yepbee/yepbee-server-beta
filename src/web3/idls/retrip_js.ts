@@ -348,6 +348,182 @@ export type RetripJs = {
         },
       ];
     },
+    {
+      name: 'likeNftAsWhitelist';
+      accounts: [
+        {
+          name: 'rent';
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: 'systemProgram';
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: 'tokenProgram';
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: 'whiteList';
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: 'payer';
+          isMut: true;
+          isSigner: true;
+        },
+        {
+          name: 'nft';
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: 'nftByUser';
+          isMut: true;
+          isSigner: false;
+        },
+      ];
+      args: [
+        {
+          name: 'mintKey';
+          type: 'publicKey';
+        },
+      ];
+    },
+    {
+      name: 'stakeToNftAsWhitelist';
+      accounts: [
+        {
+          name: 'rent';
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: 'systemProgram';
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: 'tokenProgram';
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: 'whiteList';
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: 'payer';
+          isMut: true;
+          isSigner: true;
+        },
+        {
+          name: 'mint';
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: 'programTokenAccount';
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: 'payerTokenAccount';
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: 'nft';
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: 'nftByUser';
+          isMut: true;
+          isSigner: false;
+        },
+      ];
+      args: [
+        {
+          name: 'mintKey';
+          type: 'publicKey';
+        },
+        {
+          name: 'amount';
+          type: 'u64';
+        },
+      ];
+    },
+    {
+      name: 'unstakeToNftAsWhitelist';
+      accounts: [
+        {
+          name: 'rent';
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: 'systemProgram';
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: 'tokenProgram';
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: 'whiteList';
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: 'payer';
+          isMut: true;
+          isSigner: true;
+        },
+        {
+          name: 'mint';
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: 'programTokenAccount';
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: 'payerTokenAccount';
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: 'nft';
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: 'nftByUser';
+          isMut: true;
+          isSigner: false;
+        },
+      ];
+      args: [
+        {
+          name: 'mintKey';
+          type: 'publicKey';
+        },
+        {
+          name: 'amount';
+          type: 'u64';
+        },
+      ];
+    },
   ];
   accounts: [
     {
@@ -358,6 +534,38 @@ export type RetripJs = {
           {
             name: 'whiteList';
             type: 'publicKey';
+          },
+        ];
+      };
+    },
+    {
+      name: 'nft';
+      type: {
+        kind: 'struct';
+        fields: [
+          {
+            name: 'stakes';
+            type: 'u64';
+          },
+          {
+            name: 'likes';
+            type: 'u64';
+          },
+        ];
+      };
+    },
+    {
+      name: 'nftByUser';
+      type: {
+        kind: 'struct';
+        fields: [
+          {
+            name: 'stakeAmount';
+            type: 'u64';
+          },
+          {
+            name: 'isLiked';
+            type: 'bool';
           },
         ];
       };
@@ -636,36 +844,41 @@ export type RetripJs = {
     },
     {
       code: 6005;
+      name: 'OverflowOccurs';
+      msg: 'Overflow Occurs';
+    },
+    {
+      code: 6006;
       name: 'OutOfBounds';
       msg: 'Out Of Bounds';
     },
     {
-      code: 6006;
+      code: 6007;
       name: 'CouldntFind';
       msg: "Couldn't Find";
     },
     {
-      code: 6007;
+      code: 6008;
       name: 'UnexpectKind';
       msg: 'Unexpect Kind';
     },
     {
-      code: 6008;
+      code: 6009;
       name: 'Parsing';
       msg: 'Parsing Error';
     },
     {
-      code: 6009;
+      code: 6010;
       name: 'Time';
       msg: "Couldn't Get Time";
     },
     {
-      code: 6010;
+      code: 6011;
       name: 'TooSmall';
       msg: 'Target Value Is Too Small';
     },
     {
-      code: 6011;
+      code: 6012;
       name: 'PresidentDateNotOver';
       msg: 'The President Expiration Date Still Not Over';
     },
@@ -1022,6 +1235,182 @@ export const IDL: RetripJs = {
         },
       ],
     },
+    {
+      name: 'likeNftAsWhitelist',
+      accounts: [
+        {
+          name: 'rent',
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: 'systemProgram',
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: 'tokenProgram',
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: 'whiteList',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'payer',
+          isMut: true,
+          isSigner: true,
+        },
+        {
+          name: 'nft',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'nftByUser',
+          isMut: true,
+          isSigner: false,
+        },
+      ],
+      args: [
+        {
+          name: 'mintKey',
+          type: 'publicKey',
+        },
+      ],
+    },
+    {
+      name: 'stakeToNftAsWhitelist',
+      accounts: [
+        {
+          name: 'rent',
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: 'systemProgram',
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: 'tokenProgram',
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: 'whiteList',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'payer',
+          isMut: true,
+          isSigner: true,
+        },
+        {
+          name: 'mint',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'programTokenAccount',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'payerTokenAccount',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'nft',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'nftByUser',
+          isMut: true,
+          isSigner: false,
+        },
+      ],
+      args: [
+        {
+          name: 'mintKey',
+          type: 'publicKey',
+        },
+        {
+          name: 'amount',
+          type: 'u64',
+        },
+      ],
+    },
+    {
+      name: 'unstakeToNftAsWhitelist',
+      accounts: [
+        {
+          name: 'rent',
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: 'systemProgram',
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: 'tokenProgram',
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: 'whiteList',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'payer',
+          isMut: true,
+          isSigner: true,
+        },
+        {
+          name: 'mint',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'programTokenAccount',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'payerTokenAccount',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'nft',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'nftByUser',
+          isMut: true,
+          isSigner: false,
+        },
+      ],
+      args: [
+        {
+          name: 'mintKey',
+          type: 'publicKey',
+        },
+        {
+          name: 'amount',
+          type: 'u64',
+        },
+      ],
+    },
   ],
   accounts: [
     {
@@ -1032,6 +1421,38 @@ export const IDL: RetripJs = {
           {
             name: 'whiteList',
             type: 'publicKey',
+          },
+        ],
+      },
+    },
+    {
+      name: 'nft',
+      type: {
+        kind: 'struct',
+        fields: [
+          {
+            name: 'stakes',
+            type: 'u64',
+          },
+          {
+            name: 'likes',
+            type: 'u64',
+          },
+        ],
+      },
+    },
+    {
+      name: 'nftByUser',
+      type: {
+        kind: 'struct',
+        fields: [
+          {
+            name: 'stakeAmount',
+            type: 'u64',
+          },
+          {
+            name: 'isLiked',
+            type: 'bool',
           },
         ],
       },
@@ -1310,36 +1731,41 @@ export const IDL: RetripJs = {
     },
     {
       code: 6005,
+      name: 'OverflowOccurs',
+      msg: 'Overflow Occurs',
+    },
+    {
+      code: 6006,
       name: 'OutOfBounds',
       msg: 'Out Of Bounds',
     },
     {
-      code: 6006,
+      code: 6007,
       name: 'CouldntFind',
       msg: "Couldn't Find",
     },
     {
-      code: 6007,
+      code: 6008,
       name: 'UnexpectKind',
       msg: 'Unexpect Kind',
     },
     {
-      code: 6008,
+      code: 6009,
       name: 'Parsing',
       msg: 'Parsing Error',
     },
     {
-      code: 6009,
+      code: 6010,
       name: 'Time',
       msg: "Couldn't Get Time",
     },
     {
-      code: 6010,
+      code: 6011,
       name: 'TooSmall',
       msg: 'Target Value Is Too Small',
     },
     {
-      code: 6011,
+      code: 6012,
       name: 'PresidentDateNotOver',
       msg: 'The President Expiration Date Still Not Over',
     },
