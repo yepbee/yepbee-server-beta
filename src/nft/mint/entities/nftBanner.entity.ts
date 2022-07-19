@@ -44,9 +44,9 @@ export class NftBanner extends CoreEntity {
   @IsString() // * unchecked
   @Column({ unique: true })
   mintKey: string;
-  @Field(() => Number)
+  @Field(() => Number, { defaultValue: 0 })
   @IsNumber()
-  @Column()
+  @Column({ default: 0 })
   likes: number;
 
   @Field(() => Number)
