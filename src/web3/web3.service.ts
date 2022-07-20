@@ -205,7 +205,7 @@ export class Web3Service {
     typeName: MintType,
     royalty = 5,
   ): Promise<MintingResult> {
-    const { nftMint, nftTokenAccount } = await createNftMint(
+    const { nftMint, nftTokenAccount, nft } = await createNftMint(
       this.connection,
       creatorPubkey,
       this.keypair,
@@ -228,6 +228,7 @@ export class Web3Service {
         whiteList: this.accountAddresses.whiteListPubkey,
         totalSupply: this.accountAddresses.totalSupplyPubkey,
         payer: this.masterPubkey,
+        nft,
         nftMint,
         nftTokenAccount,
         metadata,
@@ -247,7 +248,7 @@ export class Web3Service {
    */
   transferSystemToken(
     toTA: PublicKey,
-    amount: number,
+    amount: number | string,
     fromPubkey: PublicKey = this.masterPubkey,
     fromTA: PublicKey = this.masterTokenAccount,
   ): Promise<string> {
@@ -341,7 +342,7 @@ export class Web3Service {
       txhash,
       from: this.masterPubkeyString,
       to: user.pubkey,
-      amount,
+      amount: amount.toString(),
       type: TransactionType.System,
     });
 
@@ -357,7 +358,7 @@ export class Web3Service {
     const [nft] = findNftAddress(mintKeyPublicKey);
     const [nftByUser] = findNftByUserAddress(mintKeyPublicKey, userPubicKey);
     return this.program.methods
-      .likeNftAsWhitelist(mintKeyPublicKey)
+      .likeNftAsWhitelist(mintKeyPublicKey, userPubicKey)
       .accounts({
         rent: SYSVAR_RENT_PUBKEY,
         tokenProgram: ACCOUNT_KEYS.TOKEN_PROGRAM_ID,
@@ -375,6 +376,67 @@ export class Web3Service {
     return this.program.account.nft.fetch(nft);
   }
 
+  stakeToNFT(
+    userPubicKey: PublicKey,
+    mintKeyPublicKey: PublicKey,
+    amount: number | string,
+  ): Promise<string> {
+    const [nft] = findNftAddress(mintKeyPublicKey);
+    const [nftByUser] = findNftByUserAddress(mintKeyPublicKey, userPubicKey);
+    return this.program.methods
+      .stakeToNftAsWhitelist(
+        mintKeyPublicKey,
+        userPubicKey,
+        new anchor.BN(amount),
+      )
+      .accounts({
+        rent: SYSVAR_RENT_PUBKEY,
+        tokenProgram: ACCOUNT_KEYS.TOKEN_PROGRAM_ID,
+        whiteList: this.accountAddresses.whiteListPubkey,
+        payer: this.masterPubkey,
+        payerTokenAccount: this.masterTokenAccount,
+        mint: this.accountAddresses.mintPubkey,
+        programTokenAccount: this.programTokenAccount,
+        nft,
+        nftByUser,
+      })
+      .signers([this.keypair])
+      .rpc();
+  }
+
+  unstakeToNFT(
+    userPubicKey: PublicKey,
+    mintKeyPublicKey: PublicKey,
+    amount: number | string,
+  ): Promise<string> {
+    const [nft] = findNftAddress(mintKeyPublicKey);
+    const [nftByUser] = findNftByUserAddress(mintKeyPublicKey, userPubicKey);
+    return this.program.methods
+      .unstakeToNftAsWhitelist(
+        mintKeyPublicKey,
+        userPubicKey,
+        new anchor.BN(amount),
+      )
+      .accounts({
+        rent: SYSVAR_RENT_PUBKEY,
+        tokenProgram: ACCOUNT_KEYS.TOKEN_PROGRAM_ID,
+        whiteList: this.accountAddresses.whiteListPubkey,
+        payer: this.masterPubkey,
+        payerTokenAccount: this.masterTokenAccount,
+        mint: this.accountAddresses.mintPubkey,
+        programTokenAccount: this.programTokenAccount,
+        nft,
+        nftByUser,
+      })
+      .signers([this.keypair])
+      .rpc();
+  }
+
+  fetchNftByUser(mintKeyPublicKey: PublicKey, userPublicKey: PublicKey) {
+    const [nft] = findNftByUserAddress(mintKeyPublicKey, userPublicKey);
+    return this.program.account.nftByUser.fetch(nft);
+  }
+
   async getBalance(user: User): Promise<number> {
     const {
       validProperty: { internalTokenAccounts: { tokenAccount } = {} } = {},
@@ -387,7 +449,7 @@ export class Web3Service {
     return await getTokenBalance(creatorTokenAccountPubkey);
   }
 
-  pay(user: User, amount: number): Promise<string> {
+  pay(user: User, amount: number | string): Promise<string> {
     const {
       validProperty: { internalTokenAccounts: { tokenAccount } = {} } = {},
       pubkey,
@@ -407,7 +469,7 @@ export class Web3Service {
     );
   }
 
-  payback(user: User, amount: number): Promise<string> {
+  payback(user: User, amount: number | string): Promise<string> {
     const {
       validProperty: { internalTokenAccounts: { tokenAccount } = {} } = {},
     } = user;
@@ -430,7 +492,7 @@ export class Web3Service {
     txhash: string,
     from: string,
     to: string,
-    amount: number,
+    amount: number | string,
     type: TransactionType,
   ) {
     console.log('recording the transaction...');
@@ -440,7 +502,7 @@ export class Web3Service {
       txhash,
       from,
       to,
-      amount,
+      amount: amount.toString(),
       type,
     });
     await this.transactionsRepository.save(tx);

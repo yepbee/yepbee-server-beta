@@ -4,6 +4,7 @@ import { Type } from 'class-transformer';
 import {
   ArrayMaxSize,
   IsEnum,
+  IsISBN,
   IsLatitude,
   IsLongitude,
   IsNumber,
@@ -48,6 +49,10 @@ export class NftBanner extends CoreEntity {
   @IsNumber()
   @Column({ default: 0 })
   likes: number;
+  @Field(() => String, { defaultValue: '0' })
+  @IsISBN()
+  @Column({ default: '0' })
+  stakes: string;
 
   @Field(() => Number)
   @IsNumber()

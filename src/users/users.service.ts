@@ -183,7 +183,7 @@ export class UsersService {
       txhash: paymentSignature,
       from: sender,
       to: receiver,
-      amount: +this.membershipFeeStr / LAMPORTS_PER_SOL,
+      amount: (+this.membershipFeeStr / LAMPORTS_PER_SOL).toString(),
       type: TransactionType.System,
     });
 

@@ -315,6 +315,11 @@ export type RetripJs = {
           isMut: true;
           isSigner: false;
         },
+        {
+          name: 'nft';
+          isMut: true;
+          isSigner: false;
+        },
       ];
       args: [
         {
@@ -322,6 +327,41 @@ export type RetripJs = {
           type: {
             defined: 'MintArgs';
           };
+        },
+      ];
+    },
+    {
+      name: 'registerNftByUserAsWhitelist';
+      accounts: [
+        {
+          name: 'systemProgram';
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: 'whiteList';
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: 'payer';
+          isMut: true;
+          isSigner: true;
+        },
+        {
+          name: 'nftByUser';
+          isMut: true;
+          isSigner: false;
+        },
+      ];
+      args: [
+        {
+          name: 'mintKey';
+          type: 'publicKey';
+        },
+        {
+          name: 'userPubkey';
+          type: 'publicKey';
         },
       ];
     },
@@ -392,6 +432,10 @@ export type RetripJs = {
           name: 'mintKey';
           type: 'publicKey';
         },
+        {
+          name: 'userPubkey';
+          type: 'publicKey';
+        },
       ];
     },
     {
@@ -451,6 +495,10 @@ export type RetripJs = {
       args: [
         {
           name: 'mintKey';
+          type: 'publicKey';
+        },
+        {
+          name: 'userPubkey';
           type: 'publicKey';
         },
         {
@@ -516,6 +564,10 @@ export type RetripJs = {
       args: [
         {
           name: 'mintKey';
+          type: 'publicKey';
+        },
+        {
+          name: 'userPubkey';
           type: 'publicKey';
         },
         {
@@ -882,6 +934,11 @@ export type RetripJs = {
       name: 'PresidentDateNotOver';
       msg: 'The President Expiration Date Still Not Over';
     },
+    {
+      code: 6013;
+      name: 'IsAlreadyLiked';
+      msg: 'The Nft Is Already Liked';
+    },
   ];
 };
 
@@ -1202,6 +1259,11 @@ export const IDL: RetripJs = {
           isMut: true,
           isSigner: false,
         },
+        {
+          name: 'nft',
+          isMut: true,
+          isSigner: false,
+        },
       ],
       args: [
         {
@@ -1209,6 +1271,41 @@ export const IDL: RetripJs = {
           type: {
             defined: 'MintArgs',
           },
+        },
+      ],
+    },
+    {
+      name: 'registerNftByUserAsWhitelist',
+      accounts: [
+        {
+          name: 'systemProgram',
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: 'whiteList',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'payer',
+          isMut: true,
+          isSigner: true,
+        },
+        {
+          name: 'nftByUser',
+          isMut: true,
+          isSigner: false,
+        },
+      ],
+      args: [
+        {
+          name: 'mintKey',
+          type: 'publicKey',
+        },
+        {
+          name: 'userPubkey',
+          type: 'publicKey',
         },
       ],
     },
@@ -1279,6 +1376,10 @@ export const IDL: RetripJs = {
           name: 'mintKey',
           type: 'publicKey',
         },
+        {
+          name: 'userPubkey',
+          type: 'publicKey',
+        },
       ],
     },
     {
@@ -1338,6 +1439,10 @@ export const IDL: RetripJs = {
       args: [
         {
           name: 'mintKey',
+          type: 'publicKey',
+        },
+        {
+          name: 'userPubkey',
           type: 'publicKey',
         },
         {
@@ -1403,6 +1508,10 @@ export const IDL: RetripJs = {
       args: [
         {
           name: 'mintKey',
+          type: 'publicKey',
+        },
+        {
+          name: 'userPubkey',
           type: 'publicKey',
         },
         {
@@ -1768,6 +1877,11 @@ export const IDL: RetripJs = {
       code: 6012,
       name: 'PresidentDateNotOver',
       msg: 'The President Expiration Date Still Not Over',
+    },
+    {
+      code: 6013,
+      name: 'IsAlreadyLiked',
+      msg: 'The Nft Is Already Liked',
     },
   ],
 };

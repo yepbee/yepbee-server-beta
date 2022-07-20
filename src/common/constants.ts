@@ -71,6 +71,8 @@ export enum TransactionType {
   Upload,
   Mint,
   Like,
+  Stake,
+  Unstake,
   Withdraw,
   System,
   Unknown,
