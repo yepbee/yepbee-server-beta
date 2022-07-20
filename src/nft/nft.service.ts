@@ -3,12 +3,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { PublicKey } from '@retrip/js';
 import { KEY_OPTIONS, TransactionType } from 'src/common/constants';
 import { AsyncTryCatch } from 'src/common/decorators';
-import { Ok } from 'src/common/result/result.function';
+import { Err, Ok } from 'src/common/result/result.function';
 import { Transactions } from 'src/users/entities/transactions.entity';
 import { User } from 'src/users/entities/user.entity';
 import { Web3Service } from 'src/web3/web3.service';
 import { Repository } from 'typeorm';
 import { LikeNftInput, LikeNftOutput } from './dtos/likeNft.dto';
+import { StakeToNftInput, StakeToNftOutput } from './dtos/stakeToNft.dto';
 import { BannerTag } from './mint/entities/bannerTag.entity';
 import { NftBanner } from './mint/entities/nftBanner.entity';
 import { NftModuleOptions } from './nft.interface';
@@ -33,6 +34,9 @@ export class NftService {
 
   @AsyncTryCatch()
   async likeNft(user: User, { mintKey }: LikeNftInput): Promise<LikeNftOutput> {
+    const nft = await this.nftBannersRepository.findOne({ where: { mintKey } });
+    if (!nft) return Err(`Couldn't find that Nft`);
+
     let txhash = await this.web3Service.pay(user, this.RTRP_PER_LIKING_BANNER);
     try {
       await this.web3Service.recordingTransaction(
@@ -55,18 +59,16 @@ export class NftService {
       );
       txhash = await this.web3Service.likeNFT(userPublicKey, mintKeyPublicKey);
     } catch (e) {
-      const txhash = await this.web3Service.payback(
-        user,
-        this.RTRP_PER_LIKING_BANNER * 0.5,
-      );
+      const paybackAmount = this.RTRP_PER_LIKING_BANNER * 0.5;
+      const txhash = await this.web3Service.payback(user, paybackAmount);
       try {
         await this.web3Service.recordingTransaction(
           user,
           txhash,
           this.web3Service.masterPubkeyString,
           user.pubkey,
-          this.RTRP_PER_LIKING_BANNER * 0.5,
-          TransactionType.Like,
+          paybackAmount,
+          TransactionType.System,
         );
       } catch (e) {
         console.error("couldn't record the transaction", e);
@@ -78,8 +80,114 @@ export class NftService {
     ).likes.toNumber();
 
     // refresh likes
-    const nft = await this.nftBannersRepository.findOne({ where: { mintKey } });
     nft.likes = likes;
+    this.nftBannersRepository.save(nft);
+
+    return Ok(true);
+  }
+
+  @AsyncTryCatch()
+  async stakeToNft(
+    user: User,
+    { mintKey, amount }: StakeToNftInput,
+  ): Promise<StakeToNftOutput> {
+    const nft = await this.nftBannersRepository.findOne({ where: { mintKey } });
+    if (!nft) return Err(`Couldn't find that Nft`);
+
+    let txhash = await this.web3Service.pay(user, amount);
+    try {
+      await this.web3Service.recordingTransaction(
+        user,
+        txhash,
+        user.pubkey,
+        mintKey,
+        amount,
+        TransactionType.Stake,
+      );
+    } catch (e) {
+      console.error("couldn't record the transaction", e);
+    }
+
+    let mintKeyPublicKey: PublicKey;
+    try {
+      const [userPublicKey, mintKeyPublicKey] = this.web3Service.newPublicKeys(
+        user.pubkey,
+        mintKey,
+      );
+      txhash = await this.web3Service.stakeToNFT(
+        userPublicKey,
+        mintKeyPublicKey,
+        amount,
+      );
+    } catch (e) {
+      const paybackAmount = +amount * 0.5;
+      const txhash = await this.web3Service.payback(user, paybackAmount);
+      try {
+        await this.web3Service.recordingTransaction(
+          user,
+          txhash,
+          mintKey,
+          user.pubkey,
+          paybackAmount,
+          TransactionType.System,
+        );
+      } catch (e) {
+        console.error("couldn't record the transaction", e);
+      }
+    }
+
+    const stakes = (await this.web3Service.fetchNft(mintKeyPublicKey)).stakes;
+
+    // refresh stakes
+    nft.stakes = stakes.toString();
+    this.nftBannersRepository.save(nft);
+
+    return Ok(true);
+  }
+
+  @AsyncTryCatch()
+  async unstakeToNft(
+    user: User,
+    { mintKey, amount }: StakeToNftInput,
+  ): Promise<StakeToNftOutput> {
+    const nft = await this.nftBannersRepository.findOne({ where: { mintKey } });
+    if (!nft) return Err(`Couldn't find that Nft`);
+
+    // ***** WARNING ***** need to secure
+
+    const [userPublicKey, mintKeyPublicKey] = this.web3Service.newPublicKeys(
+      user.pubkey,
+      mintKey,
+    );
+    let txhash = await this.web3Service.unstakeToNFT(
+      userPublicKey,
+      mintKeyPublicKey,
+      amount,
+    );
+
+    txhash = await this.web3Service.payback(user, amount);
+    try {
+      await this.web3Service.recordingTransaction(
+        user,
+        txhash,
+        mintKey,
+        user.pubkey,
+        amount,
+        TransactionType.Unstake,
+      );
+    } catch (e) {
+      console.error(
+        "couldn't record the transaction ",
+        e,
+        '\ntxhash: ',
+        txhash,
+      );
+    }
+
+    const stakes = (await this.web3Service.fetchNft(mintKeyPublicKey)).stakes;
+
+    // refresh stakes
+    nft.stakes = stakes.toString();
     this.nftBannersRepository.save(nft);
 
     return Ok(true);

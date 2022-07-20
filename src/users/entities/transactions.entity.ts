@@ -1,12 +1,6 @@
-import { Field, Float, InputType, ObjectType } from '@nestjs/graphql';
+import { Field, InputType, ObjectType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
-import {
-  IsEnum,
-  IsNumber,
-  IsString,
-  Min,
-  ValidateNested,
-} from 'class-validator';
+import { IsEnum, IsISBN, IsString, ValidateNested } from 'class-validator';
 import { CurrencyType, TransactionType } from 'src/common/constants';
 import { PureEntity } from 'src/common/entites';
 import { IsWalletPublicKey } from 'src/common/validators';
@@ -40,11 +34,10 @@ export class Transactions extends PureEntity {
   @Column()
   to: string;
 
-  @Field(() => Float)
-  @IsNumber()
-  @Min(0)
-  @Column({ type: 'float' })
-  amount: number;
+  @Field(() => String)
+  @IsISBN()
+  @Column({ default: '0' })
+  amount: string;
 
   @Field(() => User)
   @ValidateNested()

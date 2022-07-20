@@ -108,7 +108,7 @@ export class ValidationService {
       txhash,
       from: this.web3Service.masterPubkey.toString(),
       to: user.pubkey,
-      amount: this.RTRP_PER_HONEYCON * rewards,
+      amount: (this.RTRP_PER_HONEYCON * rewards).toString(),
       type: TransactionType.Reward,
     });
 

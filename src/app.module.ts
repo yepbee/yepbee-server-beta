@@ -75,7 +75,7 @@ import { NftModule } from './nft/nft.module';
         [KEY_USER]: req[KEY_USER],
       }),
       debug: _.isNotProduction,
-      playground: _.isNotProduction,
+      playground: true, // _.isNotProduction,
     }),
     // ---------------------------
     MailModule.forRoot({
