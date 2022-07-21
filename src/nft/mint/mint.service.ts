@@ -65,7 +65,7 @@ export class MintService {
   }
 
   @AsyncTryCatch()
-  @AllowUserState(['None'])
+  // @AllowUserState(['None'])
   async uploadToArweave(
     user: User,
     {
@@ -231,7 +231,7 @@ export class MintService {
   }
 
   @AsyncTryCatch()
-  @AllowUserState(['UploadingToArweave'])
+  // @AllowUserState(['UploadingToArweave'])
   async mintBanner(user: User): Promise<NewStateOutput> {
     console.log('UploadingToArweave', user);
     const creatorPubkey = this.web3Service.newPublicKey(user.pubkey);
@@ -303,10 +303,14 @@ export class MintService {
   }
 
   @AsyncTryCatch()
-  @AllowUserState(['MintingBanner'])
+  // @AllowUserState(['MintingBanner'])
   async cacheBanner(user: User): Promise<NewStateOutput> {
     console.log('MintingBanner', user);
     const [metadataUrl, mintKey, txhash] = user.stateValue.split(' ');
+
+    if (await this.nftBannersRepository.findOne({ where: { mintKey } }))
+      return Err(`the nft is already cached`);
+
     if (!metadataUrl || !mintKey || !txhash) return Err(`invalid stateValue`);
     const data = await got(metadataUrl).json<Metadata>();
     console.log('get metadata : ', data);
