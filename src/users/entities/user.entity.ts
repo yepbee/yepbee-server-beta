@@ -12,6 +12,7 @@ import { CoreEntity } from 'src/common/entites';
 import { InputType, ObjectType, Field } from '@nestjs/graphql';
 import { IsWalletPublicKey } from 'src/common/validators';
 import {
+  IsBoolean,
   IsEmail,
   IsEnum,
   IsString,
@@ -42,7 +43,11 @@ export class User extends CoreEntity {
   @JoinColumn({ name: 'validProperty' })
   validProperty?: ValidProperty; // joined dapp peer
 
-  @Column({ type: 'enum', enum: AuthUserState, default: AuthUserState.None })
+  @Column({
+    type: 'enum',
+    enum: AuthUserState,
+    default: AuthUserState.None,
+  })
   @Field(() => AuthUserState)
   @IsEnum(AuthUserState)
   state: AuthUserState;
@@ -51,6 +56,11 @@ export class User extends CoreEntity {
   @Field(() => String)
   @IsString()
   stateValue: string;
+
+  @Field(() => Boolean)
+  @IsBoolean()
+  @Column({ type: 'boolean', default: false })
+  isWaiting: boolean;
 
   @Field(() => String)
   @IsWalletPublicKey()

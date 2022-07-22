@@ -33,7 +33,6 @@ export function AsyncTryCatch<E = string>({
 }: TryCatchOption<E> = {}) {
   return function (_target: any, _key: string, desc: PropertyDescriptor) {
     const origin = desc.value;
-
     desc.value = async function (...args: any[]) {
       try {
         return await origin.apply(this, args);

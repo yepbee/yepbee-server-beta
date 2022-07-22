@@ -1,10 +1,15 @@
 export { nanoid } from 'nanoid';
 import { ExecutionContext, HttpException } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
-import { AnyObject, ContentType, HeaderTokenType } from './interfaces';
+import { AnyObject, ContentType, HeaderTokenType, Result } from './interfaces';
 import * as FormData from 'form-data';
 import { snakeCase } from 'snake-case';
-import { contentTypes } from './constants';
+import { AuthUserState, contentTypes, TransactionType } from './constants';
+import { User } from 'src/users/entities/user.entity';
+import { Repository } from 'typeorm';
+import { Web3Service } from 'src/web3/web3.service';
+import { Err } from './result/result.function';
+import { StringOutput } from './dtos';
 
 /**
  *
@@ -84,4 +89,116 @@ export function isContentType(
   return (
     Object.keys(contentTypes).includes(s) && !omit.includes(s as ContentType)
   );
+}
+
+export function wait(user: User, usersRepository: Repository<User>) {
+  user.isWaiting = true;
+  return usersRepository.save(user, { reload: true });
+}
+export function go(user: User, usersRepository: Repository<User>) {
+  user.isWaiting = false;
+  return usersRepository.save(user, { reload: true });
+}
+export function changeState(
+  user: User,
+  usersRepository: Repository<User>,
+  state: AuthUserState,
+  stateValue?: string,
+) {
+  user.state = state;
+  if (stateValue != null) user.stateValue = stateValue;
+  return usersRepository.save(user, { reload: true });
+}
+export async function doOnce<O, E>(
+  user: User,
+  usersRepository: Repository<User>,
+  func: () => Promise<Result<O, E>>,
+) {
+  if (user.isWaiting) return Err('wait for executing...');
+  await wait(user, usersRepository);
+  const result = await func();
+  if (result.error) {
+    await go(user, usersRepository);
+  }
+  return result;
+}
+
+export async function connectStates(
+  user: User,
+  usersRepository: Repository<User>,
+  func: () => Promise<StringOutput>,
+  {
+    from,
+    to,
+  }: { from?: keyof typeof AuthUserState; to: keyof typeof AuthUserState },
+) {
+  const prevState = user.state,
+    prevStateValue = user.stateValue;
+
+  if (from) {
+    user.state = AuthUserState[from];
+    await changeState(user, usersRepository, AuthUserState[from]);
+  }
+
+  const result = await func();
+
+  if (result.ok) {
+    await changeState(user, usersRepository, AuthUserState[to], result.ok);
+  }
+  if (result.error) {
+    await changeState(user, usersRepository, prevState, prevStateValue);
+  }
+
+  return result;
+}
+
+export async function doPayable<O, E>(
+  user: User,
+  web3Service: Web3Service,
+  func: () => Promise<Result<O, E>>,
+  {
+    payAmount,
+    payType,
+    paybackType,
+    refundRate,
+  }: {
+    payAmount: number;
+    payType: TransactionType;
+    paybackType?: TransactionType;
+    refundRate?: number;
+  },
+) {
+  if (!paybackType) paybackType = payType;
+  if (!refundRate) refundRate = 0.5;
+
+  let txhash = await web3Service.pay(user, payAmount);
+  try {
+    await web3Service.recordingTransaction(
+      user,
+      txhash,
+      user.pubkey,
+      web3Service.masterPubkeyString,
+      payAmount,
+      payType,
+    );
+  } catch (e) {
+    console.error("couldn't record the transaction", e);
+  }
+  const result = await func();
+  if (result.error) {
+    txhash = await web3Service.payback(user, payAmount * refundRate);
+    try {
+      await web3Service.recordingTransaction(
+        user,
+        txhash,
+        web3Service.masterPubkeyString,
+        user.pubkey,
+        payAmount * refundRate,
+        paybackType,
+      );
+    } catch (e) {
+      console.error("couldn't record the transaction", e);
+    }
+  }
+  return result;
 }
