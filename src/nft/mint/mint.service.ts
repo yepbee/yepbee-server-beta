@@ -14,7 +14,6 @@ import { MintModuleOptions } from './mint.interface';
 import { Web3Service } from 'src/web3/web3.service';
 import { EnvService } from 'src/env/env.service';
 import {
-  ArweaveURL,
   createBannerMetadata,
   Metadata,
   parseBannerMetadata,
@@ -139,82 +138,43 @@ export class MintService {
       },
     ];
 
-    const txhash = await this.web3Service.pay(
-      user,
-      this.RTRP_PER_UPLOADING_ARWEAVE,
-    );
-    try {
-      await this.web3Service.recordingTransaction(
-        user,
-        txhash,
-        user.pubkey,
-        this.web3Service.masterPubkeyString,
-        this.RTRP_PER_UPLOADING_ARWEAVE,
-        TransactionType.Upload,
-      );
-    } catch (e) {
-      console.error("couldn't record the transaction", e);
-    }
-
     const creatorPubkey = this.web3Service.newPublicKey(user.pubkey);
-    let metadataUrl: ArweaveURL;
 
     // --------------- try ---------------
-    try {
-      const imageArweaveId = await this.web3Service.uploadToBundlr(
-        buffer,
-        mimetype as ContentType,
-        arweaveTags,
-      );
-      const imageUrl = this.web3Service.toArweaveBaseUrl(imageArweaveId);
 
-      const metadata = createBannerMetadata(
-        creatorPubkey,
-        1,
-        1,
-        {
-          latitude,
-          longitude,
-          resolution: this.MINTING_RESOLUTION,
-        },
-        imageUrl,
-        description,
-        weather,
-        temperatureCel,
-        tags.map((v) => ({ trait_type: '', value: v.value })),
-      );
+    const imageArweaveId = await this.web3Service.uploadToBundlr(
+      buffer,
+      mimetype as ContentType,
+      arweaveTags,
+    );
+    const imageUrl = this.web3Service.toArweaveBaseUrl(imageArweaveId);
 
-      arweaveTags[1].value = `metadata/${ACCOUNT_KEYS.PROGRAM_ID}/banner-v1`; // change to metadata type
+    const metadata = createBannerMetadata(
+      creatorPubkey,
+      1,
+      1,
+      {
+        latitude,
+        longitude,
+        resolution: this.MINTING_RESOLUTION,
+      },
+      imageUrl,
+      description,
+      weather,
+      temperatureCel,
+      tags.map((v) => ({ trait_type: '', value: v.value })),
+    );
 
-      const metadataArweaveId = await this.web3Service.uploadToBundlr(
-        JSON.stringify(metadata),
-        'application/json',
-        arweaveTags,
-      );
+    arweaveTags[1].value = `metadata/${ACCOUNT_KEYS.PROGRAM_ID}/banner-v1`; // change to metadata type
 
-      metadataUrl = this.web3Service.toArweaveBaseUrl(metadataArweaveId);
-      return Ok(metadataUrl);
-    } catch (e) {
-      // --------------- catch ---------------
-      const txhash = await this.web3Service.payback(
-        user,
-        this.RTRP_PER_UPLOADING_ARWEAVE * 0.5,
-      ); // 80% back
-      try {
-        await this.web3Service.recordingTransaction(
-          user,
-          txhash,
-          this.web3Service.masterPubkeyString,
-          user.pubkey,
-          this.RTRP_PER_UPLOADING_ARWEAVE * 0.5,
-          TransactionType.Upload,
-        );
-      } catch (e) {
-        console.error("couldn't record the transaction", e);
-      }
+    const metadataArweaveId = await this.web3Service.uploadToBundlr(
+      JSON.stringify(metadata),
+      'application/json',
+      arweaveTags,
+    );
 
-      throw e;
-    }
+    const metadataUrl = this.web3Service.toArweaveBaseUrl(metadataArweaveId);
+    return Ok(metadataUrl);
   }
 
   @AsyncTryCatch()
@@ -261,16 +221,21 @@ export class MintService {
     console.log('saving into our database..', parsedMetadata);
     const banner = this.nftBannersRepository.create({
       ...parsedMetadata,
+      tags: [],
       creatorUser: user,
       ownerUser: user,
       mintKey,
       txhash,
       metadataUrl,
     });
+    banner.tags = parsedMetadata.tags.map(({ value }) =>
+      this.bannerTagsRepository.create({ banner, value }),
+    );
 
-    await this.nftBannersRepository.save(banner);
-    //   user.ownedBanners.push(banner);
-    //   user.createdBanners.push(banner);
+    user.ownedBanners.push(banner);
+    user.createdBanners.push(banner);
+
+    await this.usersRepository.save(user);
 
     return Ok('');
   }
@@ -290,18 +255,20 @@ export class MintService {
         break;
     }
 
-    const txhash = await this.web3Service.payback(user, paybackCost * 0.5); // 80% payback
-    try {
-      await this.web3Service.recordingTransaction(
-        user,
-        txhash,
-        this.web3Service.masterPubkeyString,
-        user.pubkey,
-        paybackCost * 0.5,
-        TransactionType.System,
-      );
-    } catch (e) {
-      console.error("couldn't record the transaction", e);
+    if (user.isWaiting === false) {
+      const txhash = await this.web3Service.payback(user, paybackCost * 0.5); // 80% payback
+      try {
+        await this.web3Service.recordingTransaction(
+          user,
+          txhash,
+          this.web3Service.masterPubkeyString,
+          user.pubkey,
+          paybackCost * 0.5,
+          TransactionType.System,
+        );
+      } catch (e) {
+        console.error("couldn't record the transaction", e);
+      }
     }
 
     return Ok('');

@@ -110,7 +110,7 @@ export class User extends CoreEntity {
   @Field(() => [Transactions], { defaultValue: [] })
   @ValidateNested({ each: true })
   @OneToMany(() => Transactions, (tx: Transactions) => tx.owner, {
-    cascade: true,
+    cascade: ['insert', 'update'],
   })
   transactions: Transactions[];
 

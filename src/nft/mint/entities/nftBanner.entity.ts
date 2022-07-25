@@ -95,7 +95,8 @@ export class NftBanner extends CoreEntity {
   @ArrayMaxSize(SERVICE_TAGS_MAX_SIZE)
   @ValidateNested({ each: true })
   @ManyToMany(() => BannerTag, (tag: BannerTag) => tag.banner, {
-    cascade: true,
+    cascade: ['insert', 'update'],
+    nullable: true,
   })
   @JoinTable()
   tags: BannerTag[];

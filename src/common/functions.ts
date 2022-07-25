@@ -93,11 +93,11 @@ export function isContentType(
 
 export function wait(user: User, usersRepository: Repository<User>) {
   user.isWaiting = true;
-  return usersRepository.save(user, { reload: true });
+  return usersRepository.save(user);
 }
 export function go(user: User, usersRepository: Repository<User>) {
   user.isWaiting = false;
-  return usersRepository.save(user, { reload: true });
+  return usersRepository.save(user);
 }
 export function changeState(
   user: User,
@@ -106,19 +106,23 @@ export function changeState(
   stateValue?: string,
 ) {
   user.state = state;
-  if (stateValue != null) user.stateValue = stateValue;
-  return usersRepository.save(user, { reload: true });
+  if (stateValue !== null) user.stateValue = stateValue;
+  return usersRepository.save(user);
 }
+
 export async function doOnce<O, E>(
   user: User,
   usersRepository: Repository<User>,
   func: () => Promise<Result<O, E>>,
 ) {
   if (user.isWaiting) return Err('wait for executing...');
-  await wait(user, usersRepository);
-  const result = await func();
-  if (result.error) {
+  let result: Result<O, E>;
+  try {
+    await wait(user, usersRepository);
+    result = await func();
     await go(user, usersRepository);
+  } catch (e) {
+    return eToErr(e);
   }
   return result;
 }
@@ -134,21 +138,27 @@ export async function connectStates(
 ) {
   const prevState = user.state,
     prevStateValue = user.stateValue;
+  let result: StringOutput;
+  try {
+    if (from) {
+      user.state = AuthUserState[from];
+      await changeState(user, usersRepository, AuthUserState[from]);
+    }
 
-  if (from) {
-    user.state = AuthUserState[from];
-    await changeState(user, usersRepository, AuthUserState[from]);
+    result = await func();
+    console.dir(result, { depth: null });
+    console.log(result, '------------connect state!------------');
+    if (result.ok != null) {
+      await changeState(user, usersRepository, AuthUserState[to], result.ok);
+      console.log(AuthUserState[to], '------------connect end!------------');
+    }
+    if (result.error != null) {
+      await changeState(user, usersRepository, prevState, prevStateValue);
+      console.log(prevState, '------------connect end error!------------');
+    }
+  } catch (e) {
+    return eToErr(e);
   }
-
-  const result = await func();
-
-  if (result.ok) {
-    await changeState(user, usersRepository, AuthUserState[to], result.ok);
-  }
-  if (result.error) {
-    await changeState(user, usersRepository, prevState, prevStateValue);
-  }
-
   return result;
 }
 
@@ -167,38 +177,51 @@ export async function doPayable<O, E>(
     paybackType?: TransactionType;
     refundRate?: number;
   },
-) {
+): Promise<Result<O, E>> {
   if (!paybackType) paybackType = payType;
   if (!refundRate) refundRate = 0.5;
-
-  let txhash = await web3Service.pay(user, payAmount);
+  let result: Result<O, E>;
   try {
-    await web3Service.recordingTransaction(
-      user,
-      txhash,
-      user.pubkey,
-      web3Service.masterPubkeyString,
-      payAmount,
-      payType,
-    );
-  } catch (e) {
-    console.error("couldn't record the transaction", e);
-  }
-  const result = await func();
-  if (result.error) {
-    txhash = await web3Service.payback(user, payAmount * refundRate);
+    let txhash = await web3Service.pay(user, payAmount);
+
     try {
       await web3Service.recordingTransaction(
         user,
         txhash,
-        web3Service.masterPubkeyString,
         user.pubkey,
-        payAmount * refundRate,
-        paybackType,
+        web3Service.masterPubkeyString,
+        payAmount,
+        payType,
       );
     } catch (e) {
       console.error("couldn't record the transaction", e);
     }
+
+    result = await func();
+    if (result.error) {
+      txhash = await web3Service.payback(user, payAmount * refundRate);
+
+      try {
+        await web3Service.recordingTransaction(
+          user,
+          txhash,
+          web3Service.masterPubkeyString,
+          user.pubkey,
+          payAmount * refundRate,
+          paybackType,
+        );
+      } catch (e) {
+        console.error("couldn't record the transaction", e);
+      }
+    }
+  } catch (e) {
+    return eToErr(e) as any;
   }
   return result;
+}
+
+export function eToErr(e: any) {
+  // if (EnvModule.isNotProduction) console.error(e);
+  console.error(e);
+  return Err(e.message || '');
 }

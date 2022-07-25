@@ -22,11 +22,6 @@ export class MintResolver {
     private readonly usersRepository: Repository<User>,
   ) {}
 
-  /*
-    1. uploadingPhotoToArweave && uploadingMetadataToArweave
-    2. mintingBanner
-  */
-
   private returnNewState<R extends Result<any, any>>(
     result: R,
     newState: keyof typeof AuthUserState,
@@ -38,6 +33,11 @@ export class MintResolver {
           stateValue: result.ok,
         });
   }
+
+  /*
+    1. uploadingPhotoToArweave && uploadingMetadataToArweave
+    2. mintingBanner
+  */
 
   @Mutation(() => NewStateOutput)
   @Allow(['ValidUser'])
@@ -74,7 +74,7 @@ export class MintResolver {
 
   @Mutation(() => NewStateOutput)
   @Allow(['ValidUser'])
-  @AllowUserState(['UploadingToArweave'])
+  @AllowUserState(['MintingBanner'])
   async mintBanner(@AuthUser() user: User): Promise<NewStateOutput> {
     return this.returnNewState(
       await doOnce(user, this.usersRepository, () =>
@@ -87,12 +87,11 @@ export class MintResolver {
               this.web3Service,
               () => this.mintsServise.mintBanner(user), // mint
               {
-                payType: TransactionType.Upload,
+                payType: TransactionType.Mint,
                 payAmount: this.mintsServise.RTRP_PER_MINTING_BANNER,
               },
             ),
           {
-            from: 'MintingBanner',
             to: 'CachingBanner',
           },
         ),
@@ -103,7 +102,7 @@ export class MintResolver {
 
   @Mutation(() => NewStateOutput)
   @Allow(['ValidUser'])
-  @AllowUserState(['MintingBanner'])
+  @AllowUserState(['CachingBanner'])
   async cacheBanner(@AuthUser() user: User): Promise<NewStateOutput> {
     return this.returnNewState(
       await doOnce(user, this.usersRepository, () =>
@@ -112,7 +111,6 @@ export class MintResolver {
           this.usersRepository,
           () => this.mintsServise.cacheBanner(user), // cache
           {
-            from: 'CachingBanner',
             to: 'None',
           },
         ),
