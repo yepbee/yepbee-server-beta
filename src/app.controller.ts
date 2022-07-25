@@ -24,10 +24,10 @@ export class AppController {
   }
 
   // for the test purpose
-  // @Get('faucetMaster')
-  // async faucetMaster(): Promise<string> {
-  //   return this.web3Service.faucetMaster();
-  // }
+  @Get('faucetMaster')
+  async faucetMaster(): Promise<string> {
+    return this.web3Service.faucetMaster();
+  }
 
   @Get()
   home(): string {

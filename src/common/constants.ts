@@ -54,6 +54,7 @@ export enum AuthUserState {
   // ValidatingHoneycon = 'ValidatingHoneycon',
   UploadingToArweave = 'UploadingToArweave',
   MintingBanner = 'MintingBanner',
+  CachingBanner = 'CachingBanner',
 }
 
 export enum RtimeId {

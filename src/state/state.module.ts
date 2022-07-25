@@ -4,7 +4,7 @@ import { KEY_OPTIONS } from 'src/common/constants';
 import { User } from 'src/users/entities/user.entity';
 import { Transactions } from 'src/users/entities/transactions.entity';
 import { StateModuleOptions } from './state.interface';
-import { StateService } from './state.service';
+// import { StateService } from './state.service';
 
 @Global()
 @Module({})
@@ -18,9 +18,9 @@ export class StateModule {
           provide: KEY_OPTIONS,
           useValue: options,
         },
-        StateService,
+        // StateService,
       ],
-      exports: [StateService],
+      // exports: [StateService],
     };
   }
 }

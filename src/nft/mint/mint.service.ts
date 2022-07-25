@@ -6,7 +6,7 @@ import {
   TransactionType,
 } from 'src/common/constants';
 import { AsyncTryCatch } from 'src/common/decorators';
-import { Err, Ok } from 'src/common/result/result.function';
+import { Ok } from 'src/common/result/result.function';
 import { User } from 'src/users/entities/user.entity';
 import { VerificationService } from 'src/verification/verification.service';
 import { geoToH3 } from 'h3-js';
@@ -14,7 +14,6 @@ import { MintModuleOptions } from './mint.interface';
 import { Web3Service } from 'src/web3/web3.service';
 import { EnvService } from 'src/env/env.service';
 import {
-  ArweaveURL,
   createBannerMetadata,
   Metadata,
   parseBannerMetadata,
@@ -28,12 +27,10 @@ import { NftBanner } from './entities/nftBanner.entity';
 import { Repository } from 'typeorm';
 import { BannerTag } from './entities/bannerTag.entity';
 import { Transactions } from 'src/users/entities/transactions.entity';
-import { StateService } from '../../state/state.service';
 import { AllowUserState } from 'src/auth/allow.decorator';
-import { NewStateOutput } from './dtos/common.dto';
 import { UploadToArweaveInput } from './dtos/uploadToArweave.dto';
 import got from 'got';
-import { MintingResult } from 'src/web3/web3.interface';
+import { StringOutput } from 'src/common/dtos';
 
 @Injectable()
 export class MintService {
@@ -47,7 +44,7 @@ export class MintService {
     private readonly envsService: EnvService,
     private readonly varificationsService: VerificationService,
     private readonly web3Service: Web3Service,
-    private readonly stateService: StateService,
+    // private readonly stateService: StateService,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
     @InjectRepository(NftBanner)
@@ -65,7 +62,6 @@ export class MintService {
   }
 
   @AsyncTryCatch()
-  @AllowUserState(['None'])
   async uploadToArweave(
     user: User,
     {
@@ -76,13 +72,12 @@ export class MintService {
       weather,
       temperatureCel,
     }: UploadToArweaveInput,
-  ): Promise<NewStateOutput> {
-    console.log('None', user);
+  ): Promise<StringOutput> {
     const tokenId = 1; // for test (temporary)
     const { mimetype, createReadStream } = await file;
     // check mime-type
     if (isContentType(mimetype, { omit: ['application/json'] }) === false)
-      return Err(
+      throw new Error(
         `Invalid mime-type ${mimetype}. the mime-type should be in the ${Object.keys(
           contentTypes,
         ).filter((v: ContentType) => v !== 'application/json')}`,
@@ -92,14 +87,14 @@ export class MintService {
       temperatureCel < this.TEMPERATURE_MIN ||
       temperatureCel > this.TEMPERATURE_MAX
     )
-      return Err(
+      throw new Error(
         `Invalid temperatrue range ${this.TEMPERATURE_MIN} <= ${temperatureCel} <= ${this.TEMPERATURE_MAX}`,
       );
 
     const creatorBalance = await this.web3Service.getBalance(user);
 
     if (creatorBalance < this.RTRP_PER_MINTING_BANNER)
-      return Err(
+      throw new Error(
         `Insufficient token balance : ${creatorBalance} should be more than ${this.RTRP_PER_MINTING_BANNER}`,
       );
 
@@ -143,204 +138,112 @@ export class MintService {
       },
     ];
 
-    const txhash = await this.web3Service.pay(
-      user,
-      this.RTRP_PER_UPLOADING_ARWEAVE,
-    );
-    try {
-      await this.web3Service.recordingTransaction(
-        user,
-        txhash,
-        user.pubkey,
-        this.web3Service.masterPubkeyString,
-        this.RTRP_PER_UPLOADING_ARWEAVE,
-        TransactionType.Upload,
-      );
-    } catch (e) {
-      console.error("couldn't record the transaction", e);
-    }
-
     const creatorPubkey = this.web3Service.newPublicKey(user.pubkey);
-    let metadataUrl: ArweaveURL;
 
     // --------------- try ---------------
-    try {
-      const imageArweaveId = await this.web3Service.uploadToBundlr(
-        buffer,
-        mimetype as ContentType,
-        arweaveTags,
-      );
-      const imageUrl = this.web3Service.toArweaveBaseUrl(imageArweaveId);
 
-      const metadata = createBannerMetadata(
-        creatorPubkey,
-        1,
-        1,
-        {
-          latitude,
-          longitude,
-          resolution: this.MINTING_RESOLUTION,
-        },
-        imageUrl,
-        description,
-        weather,
-        temperatureCel,
-        tags.map((v) => ({ trait_type: '', value: v.value })),
-      );
+    const imageArweaveId = await this.web3Service.uploadToBundlr(
+      buffer,
+      mimetype as ContentType,
+      arweaveTags,
+    );
+    const imageUrl = this.web3Service.toArweaveBaseUrl(imageArweaveId);
 
-      arweaveTags[1].value = `metadata/${ACCOUNT_KEYS.PROGRAM_ID}/banner-v1`; // change to metadata type
+    const metadata = createBannerMetadata(
+      creatorPubkey,
+      1,
+      1,
+      {
+        latitude,
+        longitude,
+        resolution: this.MINTING_RESOLUTION,
+      },
+      imageUrl,
+      description,
+      weather,
+      temperatureCel,
+      tags.map((v) => ({ trait_type: '', value: v.value })),
+    );
 
-      const metadataArweaveId = await this.web3Service.uploadToBundlr(
-        JSON.stringify(metadata),
-        'application/json',
-        arweaveTags,
-      );
+    arweaveTags[1].value = `metadata/${ACCOUNT_KEYS.PROGRAM_ID}/banner-v1`; // change to metadata type
 
-      metadataUrl = this.web3Service.toArweaveBaseUrl(metadataArweaveId);
-    } catch (e) {
-      // --------------- catch ---------------
-      const txhash = await this.web3Service.payback(
-        user,
-        this.RTRP_PER_UPLOADING_ARWEAVE * 0.5,
-      ); // 80% back
-      try {
-        await this.web3Service.recordingTransaction(
-          user,
-          txhash,
-          this.web3Service.masterPubkeyString,
-          user.pubkey,
-          this.RTRP_PER_UPLOADING_ARWEAVE * 0.5,
-          TransactionType.Upload,
-        );
-      } catch (e) {
-        console.error("couldn't record the transaction", e);
-      }
+    const metadataArweaveId = await this.web3Service.uploadToBundlr(
+      JSON.stringify(metadata),
+      'application/json',
+      arweaveTags,
+    );
 
-      throw e;
-    }
-
-    const newState = AuthUserState.UploadingToArweave;
-    const stateValue = metadataUrl;
-
-    await this.stateService.next(user.state, newState, user, stateValue);
-
-    return Ok({
-      newState,
-      stateValue,
-    });
+    const metadataUrl = this.web3Service.toArweaveBaseUrl(metadataArweaveId);
+    return Ok(metadataUrl);
   }
 
   @AsyncTryCatch()
-  @AllowUserState(['UploadingToArweave'])
-  async mintBanner(user: User): Promise<NewStateOutput> {
-    console.log('UploadingToArweave', user);
+  async mintBanner(user: User): Promise<StringOutput> {
     const creatorPubkey = this.web3Service.newPublicKey(user.pubkey);
     const metadataUrl = user.stateValue;
-    if (!metadataUrl) return Err(`invalid stateValue`);
+    if (!metadataUrl) throw new Error(`invalid stateValue`);
     const data = await got(metadataUrl).json<Metadata>();
-    console.log('get metadata : ', data);
+
     if (typeof data !== 'object' || !data.name)
-      return Err(`invalid metadataUrl`);
+      throw new Error(`invalid metadataUrl`);
 
-    const txhash = await this.web3Service.pay(
-      user,
-      this.RTRP_PER_MINTING_BANNER,
+    const mintingResult = await this.web3Service.mintNFT(
+      creatorPubkey,
+      metadataUrl,
+      data.name,
+      'rtb1',
+      'banner',
     );
-    try {
-      await this.web3Service.recordingTransaction(
-        user,
-        txhash,
-        user.pubkey,
-        this.web3Service.masterPubkeyString,
-        this.RTRP_PER_MINTING_BANNER,
-        TransactionType.Mint,
-      );
-    } catch (e) {
-      console.error("couldn't record the transaction", e);
-    }
 
-    let mintingResult: MintingResult;
-    try {
-      mintingResult = await this.web3Service.mintNFT(
-        creatorPubkey,
-        metadataUrl,
-        data.name,
-        'rtb1',
-        'banner',
-      );
+    const stateValue = `${metadataUrl} ${mintingResult.mintKey.toString()} ${
+      mintingResult.txhash
+    }`;
 
-      const newState = AuthUserState.MintingBanner;
-      const stateValue = `${metadataUrl} ${mintingResult.mintKey.toString()} ${
-        mintingResult.txhash
-      }`;
-
-      await this.stateService.next(user.state, newState, user, stateValue);
-
-      return Ok({
-        newState,
-        stateValue,
-      });
-    } catch (e) {
-      const txhash = await this.web3Service.payback(
-        user,
-        this.RTRP_PER_MINTING_BANNER * 0.5,
-      );
-      try {
-        await this.web3Service.recordingTransaction(
-          user,
-          txhash,
-          this.web3Service.masterPubkeyString,
-          user.pubkey,
-          this.RTRP_PER_MINTING_BANNER * 0.5,
-          TransactionType.Mint,
-        );
-      } catch (e) {
-        console.error("couldn't record the transaction", e);
-      }
-
-      throw e;
-    }
+    return Ok(stateValue);
   }
 
   @AsyncTryCatch()
-  @AllowUserState(['MintingBanner'])
-  async cacheBanner(user: User): Promise<NewStateOutput> {
-    console.log('MintingBanner', user);
+  async cacheBanner(user: User): Promise<StringOutput> {
     const [metadataUrl, mintKey, txhash] = user.stateValue.split(' ');
-    if (!metadataUrl || !mintKey || !txhash) return Err(`invalid stateValue`);
+
+    if (await this.nftBannersRepository.findOne({ where: { mintKey } }))
+      throw new Error(`the nft is already cached`);
+
+    if (!metadataUrl || !mintKey || !txhash)
+      throw new Error(`invalid stateValue`);
+
     const data = await got(metadataUrl).json<Metadata>();
-    console.log('get metadata : ', data);
-    if (typeof data !== 'object') return Err(`invalid metadataUrl`);
+
+    if (typeof data !== 'object') throw new Error(`invalid metadataUrl`);
 
     const parsedMetadata = parseBannerMetadata(data);
 
     console.log('saving into our database..', parsedMetadata);
     const banner = this.nftBannersRepository.create({
       ...parsedMetadata,
+      tags: [],
       creatorUser: user,
       ownerUser: user,
       mintKey,
       txhash,
       metadataUrl,
     });
+    banner.tags = parsedMetadata.tags.map(({ value }) =>
+      this.bannerTagsRepository.create({ banner, value }),
+    );
 
-    await this.nftBannersRepository.save(banner);
     user.ownedBanners.push(banner);
     user.createdBanners.push(banner);
 
-    const newState = AuthUserState.None;
-    const stateValue = '';
-    await this.stateService.next(user.state, newState, user, stateValue); // to initial
+    await this.usersRepository.save(user);
 
-    return Ok({ newState, stateValue });
+    return Ok('');
   }
 
   @AsyncTryCatch()
-  // @AllowUserState(['UploadingToArweave'])
   @AllowUserState(['UploadingToArweave', 'MintingBanner'])
-  async cancelMinting(user: User): Promise<NewStateOutput> {
-    console.log('cancelMinting', user);
-    let paybackCost: number;
+  async cancelMinting(user: User): Promise<StringOutput> {
+    let paybackCost = 0;
 
     switch (user.state) {
       case AuthUserState.UploadingToArweave:
@@ -352,30 +255,22 @@ export class MintService {
         break;
     }
 
-    const newState = AuthUserState.None;
-    const stateValue = '';
-    // to initial
-    if (
-      (await this.stateService.next(user.state, newState, user, stateValue)) ===
-      false
-    ) {
-      throw new Error(`couldn't change the state ${newState}`);
+    if (user.isWaiting === false) {
+      const txhash = await this.web3Service.payback(user, paybackCost * 0.5); // 80% payback
+      try {
+        await this.web3Service.recordingTransaction(
+          user,
+          txhash,
+          this.web3Service.masterPubkeyString,
+          user.pubkey,
+          paybackCost * 0.5,
+          TransactionType.System,
+        );
+      } catch (e) {
+        console.error("couldn't record the transaction", e);
+      }
     }
 
-    const txhash = await this.web3Service.payback(user, paybackCost * 0.5); // 80% payback
-    try {
-      await this.web3Service.recordingTransaction(
-        user,
-        txhash,
-        this.web3Service.masterPubkeyString,
-        user.pubkey,
-        paybackCost * 0.5,
-        TransactionType.System,
-      );
-    } catch (e) {
-      console.error("couldn't record the transaction", e);
-    }
-
-    return Ok({ newState, stateValue });
+    return Ok('');
   }
 }
