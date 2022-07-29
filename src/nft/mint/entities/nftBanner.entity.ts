@@ -45,11 +45,11 @@ export class NftBanner extends CoreEntity {
   @IsString() // * unchecked
   @Column({ unique: true })
   mintKey: string;
-  @Field(() => Number, { defaultValue: 0 })
+  @Field(() => Number)
   @IsNumber()
   @Column({ default: 0 })
   likes: number;
-  @Field(() => String, { defaultValue: '0' })
+  @Field(() => String)
   @IsISBN()
   @Column({ default: '0' })
   stakes: string;
@@ -91,7 +91,7 @@ export class NftBanner extends CoreEntity {
   @IsEnum(Weather)
   weather: Weather;
 
-  @Field(() => [BannerTag], { defaultValue: [] })
+  @Field(() => [BannerTag])
   @ArrayMaxSize(SERVICE_TAGS_MAX_SIZE)
   @ValidateNested({ each: true })
   @ManyToMany(() => BannerTag, (tag: BannerTag) => tag.banner, {
@@ -117,13 +117,13 @@ export class NftBanner extends CoreEntity {
   })
   ownerUser: User;
 
-  @Field(() => Number, { defaultValue: 5 })
+  @Field(() => Number)
   @IsNumber()
   @Length(0, 20)
   @Column({ default: 5 })
   royalty: number;
 
-  @Field(() => String, { defaultValue: 'retrip' })
+  @Field(() => String)
   @IsString()
   @Column({ default: 'retrip' })
   edition: string;

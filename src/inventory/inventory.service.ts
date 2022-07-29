@@ -33,6 +33,7 @@ export class InventoryService {
     amount,
     index,
   }: GetBannersInput): Promise<GetBannersOutput> {
+    console.log(where);
     const result = await this.nftBannersRepository.find({
       where: where as FindOptionsWhere<NftBanner>[],
       relations: ['creatorUser', 'ownerUser', 'tags'], // !TODO: tags
@@ -42,6 +43,7 @@ export class InventoryService {
         likes: 'DESC',
       },
     });
+    console.log(result.map((v) => v.likes));
     return Ok(result);
   }
   @AsyncTryCatch()

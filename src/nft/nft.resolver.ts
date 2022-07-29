@@ -12,7 +12,7 @@ export class NftResolver {
 
   @Mutation(() => LikeNftOutput)
   @Allow(['ValidUser'])
-  @AllowUserState(['None'])
+  // @AllowUserState(['None'])
   likeNft(
     @AuthUser() user: User,
     @Args() likeNftInput: LikeNftInput,
