@@ -9,6 +9,8 @@ import { TokenSymbol, Weather } from '@retrip/js';
 registerEnumType(Weather, { name: 'Weather' });
 registerEnumType(TokenSymbol, { name: 'TokenSymbol' });
 
+export const INVENTORY_MAX_OUTPUT_LENGTH = 100000;
+
 export const SERVICE_DESCRIPTION_LENGTH = 2200;
 
 export const SERVICE_TAG_LENGTH = 22;

@@ -19,6 +19,7 @@ import { UsersModule } from './users/users.module';
 import { User } from './users/entities/user.entity';
 import { AuthMiddleware } from './auth/auth.middleware';
 import {
+  INVENTORY_MAX_OUTPUT_LENGTH,
   KEY_DATABASE_URL,
   KEY_PUBKEY,
   KEY_RTIME,
@@ -114,7 +115,7 @@ import { NftModule } from './nft/nft.module';
       rtrpPerHoneycon: +_.ENVS.SERVICE_RTRP_PER_HONEYCON,
     }),
     InventoryModule.forRoot({
-      maxOutputLength: +_.ENVS.INVENTORY_MAX_OUTPUT_LENGTH,
+      maxOutputLength: INVENTORY_MAX_OUTPUT_LENGTH,
     }),
     MintModule.forRoot({
       h3MintingResolution: +_.ENVS.H3_MINTING_RESOLUTION,

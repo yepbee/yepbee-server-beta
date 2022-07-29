@@ -57,7 +57,6 @@ export class EnvModule {
       SERVICE_RTRP_PER_LIKING_BANNER: '',
       SERVICE_RTRP_PER_MINTING_BANNER: '',
       SERVICE_RTRP_PER_UPLOADING_TO_ARWEAVE: '',
-      INVENTORY_MAX_OUTPUT_LENGTH: '',
     });
 
   static getConfig = () => ({

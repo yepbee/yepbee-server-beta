@@ -1,6 +1,16 @@
 import { ArgsType, Field, Float, Int, ObjectType } from '@nestjs/graphql';
-import { IsInt, IsLatitude, IsLongitude, Max, Min } from 'class-validator';
-import { H3_WALKING_RESOLUTION } from 'src/common/constants';
+import {
+  IsInt,
+  IsLatitude,
+  IsLongitude,
+  IsNumber,
+  Max,
+  Min,
+} from 'class-validator';
+import {
+  H3_WALKING_RESOLUTION,
+  INVENTORY_MAX_OUTPUT_LENGTH,
+} from 'src/common/constants';
 import { CoreOutput } from 'src/common/dtos';
 import { ResField } from 'src/common/result/result.decorator';
 import { IsH3Index } from 'src/common/validators';
@@ -16,6 +26,15 @@ export class GetBannersByH3RingInput {
   @Min(1)
   @Max(4)
   radius: number;
+  @Field(() => Number, { defaultValue: INVENTORY_MAX_OUTPUT_LENGTH })
+  @IsNumber()
+  @Min(1)
+  @Max(INVENTORY_MAX_OUTPUT_LENGTH)
+  amount: number;
+  @Field(() => Number, { defaultValue: 0 })
+  @IsNumber()
+  @Min(0)
+  index: number;
 }
 
 @ObjectType()
@@ -37,6 +56,15 @@ export class GetBannersByRingInput {
   @Min(1)
   @Max(40075000) // eath circumference
   radiusM: number;
+  @Field(() => Number, { defaultValue: INVENTORY_MAX_OUTPUT_LENGTH })
+  @IsNumber()
+  @Min(1)
+  @Max(INVENTORY_MAX_OUTPUT_LENGTH)
+  amount: number;
+  @Field(() => Number, { defaultValue: 0 })
+  @IsNumber()
+  @Min(0)
+  index: number;
 }
 
 @ObjectType()
