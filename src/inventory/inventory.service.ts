@@ -28,11 +28,19 @@ export class InventoryService {
   }
 
   @AsyncTryCatch()
-  async getBanners({ where }: GetBannersInput): Promise<GetBannersOutput> {
+  async getBanners({
+    where,
+    amount,
+    index,
+  }: GetBannersInput): Promise<GetBannersOutput> {
     const result = await this.nftBannersRepository.find({
       where: where as FindOptionsWhere<NftBanner>[],
       relations: ['creatorUser', 'ownerUser', 'tags'], // !TODO: tags
-      take: this.MAX_OUTPUT_LENGTH,
+      take: amount,
+      skip: amount * index,
+      order: {
+        likes: 'DESC',
+      },
     });
     return Ok(result);
   }
@@ -40,12 +48,18 @@ export class InventoryService {
   async getBannersByH3Ring({
     h3Center,
     radius,
+    amount,
+    index,
   }: GetBannersByH3RingInput): Promise<GetBannersByH3RingOutput> {
     const h3s = kRing(h3Center, radius).map((h3) => ({ h3 }));
     const result = await this.nftBannersRepository.find({
       where: h3s,
       relations: ['creatorUser', 'ownerUser', 'tags'],
-      take: this.MAX_OUTPUT_LENGTH,
+      take: amount,
+      skip: amount * index,
+      order: {
+        likes: 'DESC',
+      },
     });
     return Ok(result);
   }
@@ -54,6 +68,8 @@ export class InventoryService {
     latitude,
     longitude,
     radiusM,
+    amount,
+    index,
   }: // maxCount = 20, * by likes
   GetBannersByRingInput): Promise<GetBannersByRingOutput> {
     const latLng = { latitude, longitude };
@@ -79,7 +95,11 @@ export class InventoryService {
         longitude: Between(longitude - lngDown, longitude + lngUp),
       },
       relations: ['creatorUser', 'ownerUser', 'tags'],
-      take: this.MAX_OUTPUT_LENGTH,
+      take: amount,
+      skip: amount * index,
+      order: {
+        likes: 'DESC',
+      },
     });
     return Ok(result);
   }
