@@ -155,7 +155,7 @@ export class NftService {
     // nft.stakes = stakes.toString();
     nft.stakes = new BN(nft.stakes).add(new BN(amount)).toString(); // for testing
 
-    this.nftBannersRepository.save(nft);
+    await this.nftBannersRepository.save(nft);
 
     return Ok(true);
   }
@@ -215,7 +215,7 @@ export class NftService {
     // nft.stakes = stakes.toString();
     nft.stakes = new BN(nft.stakes).sub(new BN(amount)).toString(); // for testing
 
-    this.nftBannersRepository.save(nft);
+    await this.nftBannersRepository.save(nft);
 
     return Ok(true);
   }

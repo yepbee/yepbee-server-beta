@@ -172,7 +172,5 @@ export class NftBanner extends CoreEntity {
     this.h3 = geoToH3(this.latitude, this.longitude, H3_WALKING_RESOLUTION);
     this.name = `banner-v${this.version}-${this.tokenId}-${this.h3}:${H3_WALKING_RESOLUTION}`;
     this.temperatureCel = +this.temperatureCel.toFixed(2);
-    this.likedUsers = this.likedUsers || [];
-    this.likes = this.likedUsers.length;
   }
 }
