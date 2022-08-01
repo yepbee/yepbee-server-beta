@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Keypair } from '@retrip/js';
-import BN from 'bn.js';
+import * as BN from 'bn.js';
 import { KEY_OPTIONS, TransactionType } from 'src/common/constants';
 import { AsyncTryCatch } from 'src/common/decorators';
 import { Err, Ok } from 'src/common/result/result.function';

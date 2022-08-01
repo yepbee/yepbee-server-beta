@@ -1,7 +1,7 @@
 import { ValidationOptions, ValidateBy, buildMessage } from 'class-validator';
 import { isWalletPublicKey } from '@retrip/js';
 import { h3GetResolution } from 'h3-js';
-import { BN, isBN } from 'bn.js';
+import * as BN from 'bn.js';
 
 export function IsWalletPublicKey(
   validationOptions?: ValidationOptions,
@@ -50,14 +50,13 @@ export function IsBN(
       name: 'isBN',
       validator: {
         validate: (value): boolean => {
-          if (isBN(value)) {
-            if (min) {
-              return new BN(value).cmp(new BN(min)) > -1;
-            } else {
-              return true;
-            }
+          try {
+            const bn = new BN(value);
+            const minBn = new BN(min);
+            return bn.cmp(minBn) > -1;
+          } catch (_) {
+            return false;
           }
-          return false;
         },
         defaultMessage: buildMessage(
           (eachPrefix) =>
