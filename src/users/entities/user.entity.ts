@@ -95,6 +95,13 @@ export class User extends CoreEntity {
 
   @Field(() => [NftBanner], { defaultValue: [] })
   @ValidateNested({ each: true })
+  @OneToMany(() => NftBanner, (banner: NftBanner) => banner.likedUsers, {
+    cascade: true,
+  })
+  likedBanners: NftBanner[];
+
+  @Field(() => [NftBanner], { defaultValue: [] })
+  @ValidateNested({ each: true })
   @OneToMany(() => NftBanner, (banner: NftBanner) => banner.creatorUser, {
     cascade: ['insert', 'update'],
   })

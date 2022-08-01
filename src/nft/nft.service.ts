@@ -37,6 +37,8 @@ export class NftService {
   async likeNft(user: User, { mintKey }: LikeNftInput): Promise<LikeNftOutput> {
     const nft = await this.nftBannersRepository.findOne({ where: { mintKey } });
     if (!nft) return Err(`Couldn't find that Nft`);
+    if (user.likedBanners.find((v) => v.mintKey === nft.mintKey))
+      return Err(`Already liked Nft`);
 
     let txhash = await this.web3Service.pay(user, this.RTRP_PER_LIKING_BANNER);
     try {
@@ -83,7 +85,7 @@ export class NftService {
 
     // refresh likes
     // nft.likes = likes;
-    nft.likes++; // for testing
+    nft.likedUsers.push(user);
     this.nftBannersRepository.save(nft);
 
     return Ok(true);
