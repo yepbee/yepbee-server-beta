@@ -35,8 +35,12 @@ export class NftService {
 
   @AsyncTryCatch()
   async likeNft(user: User, { mintKey }: LikeNftInput): Promise<LikeNftOutput> {
-    const nft = await this.nftBannersRepository.findOne({ where: { mintKey } });
+    const nft = await this.nftBannersRepository.findOne({
+      where: { mintKey },
+      relations: ['likedUsers'],
+    });
     if (!nft) return Err(`Couldn't find that Nft`);
+    console.log(user);
     if (user.likedBanners.find((v) => v.mintKey === nft.mintKey))
       return Err(`Already liked Nft`);
 
@@ -86,7 +90,10 @@ export class NftService {
     // refresh likes
     // nft.likes = likes;
     nft.likedUsers.push(user);
-    this.nftBannersRepository.save(nft);
+    nft.likes = nft.likedUsers.length;
+    // user.likedBanners.push(nft);
+    // await this.usersRepository.save(user);
+    await this.nftBannersRepository.save(nft);
 
     return Ok(true);
   }
@@ -158,7 +165,10 @@ export class NftService {
     user: User,
     { mintKey, amount }: StakeToNftInput,
   ): Promise<StakeToNftOutput> {
-    const nft = await this.nftBannersRepository.findOne({ where: { mintKey } });
+    const nft = await this.nftBannersRepository.findOne({
+      where: { mintKey },
+      relations: ['ownerUser'],
+    });
     if (!nft) return Err(`Couldn't find that Nft`);
     if (user.pubkey !== nft.ownerUser.pubkey)
       return Err(`Forbidden Resource: Not Owner`);

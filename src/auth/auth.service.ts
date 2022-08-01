@@ -13,7 +13,12 @@ export class AuthService {
       where: {
         pubkey,
       },
-      relations: ['createdBanners', 'ownedBanners', 'transactions'],
+      relations: [
+        'likedBanners',
+        'createdBanners',
+        'ownedBanners',
+        'transactions',
+      ],
     });
   }
 }

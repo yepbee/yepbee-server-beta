@@ -86,16 +86,20 @@ export class User extends CoreEntity {
   @Column({ default: 'please write down your bio' })
   bio?: string;
 
+  @Field(() => [User], { defaultValue: [] })
+  @ValidateNested({ each: true })
   @ManyToMany(() => User, (user) => user.following, { onDelete: 'CASCADE' })
   @JoinTable({ joinColumn: { name: 'followers' } })
   followers: User[];
+  @Field(() => [User], { defaultValue: [] })
+  @ValidateNested({ each: true })
   @ManyToMany(() => User, (user) => user.followers, { onDelete: 'CASCADE' })
   @JoinTable({ inverseJoinColumn: { name: 'following' } })
   following: User[];
 
   @Field(() => [NftBanner], { defaultValue: [] })
   @ValidateNested({ each: true })
-  @OneToMany(() => NftBanner, (banner: NftBanner) => banner.likedUsers, {
+  @ManyToMany(() => NftBanner, (banner: NftBanner) => banner.likedUsers, {
     cascade: true,
   })
   likedBanners: NftBanner[];
@@ -123,6 +127,9 @@ export class User extends CoreEntity {
 
   @BeforeInsert()
   insertDefaultValues() {
+    if (!this.likedBanners) {
+      this.likedBanners = [];
+    }
     if (!this.nickname) {
       this.nickname = `user${nanoid(6)}`;
     }

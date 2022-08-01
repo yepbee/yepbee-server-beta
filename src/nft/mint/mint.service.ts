@@ -222,6 +222,7 @@ export class MintService {
     const banner = this.nftBannersRepository.create({
       ...parsedMetadata,
       tags: [],
+      likedUsers: [],
       creatorUser: user,
       ownerUser: user,
       mintKey,

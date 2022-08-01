@@ -100,7 +100,7 @@ export class NftBanner extends CoreEntity {
   @JoinTable()
   tags: BannerTag[];
 
-  @Field(() => [User])
+  @Field(() => [User], { defaultValue: [] })
   @ValidateNested({ each: true })
   @ManyToMany(() => User, (user: User) => user.likedBanners, {
     nullable: true,
