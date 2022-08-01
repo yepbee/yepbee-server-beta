@@ -1,9 +1,9 @@
 import { Field, InputType, ObjectType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
-import { IsEnum, IsISBN, IsString, ValidateNested } from 'class-validator';
+import { IsEnum, IsString, ValidateNested } from 'class-validator';
 import { CurrencyType, TransactionType } from 'src/common/constants';
 import { PureEntity } from 'src/common/entites';
-import { IsWalletPublicKey } from 'src/common/validators';
+import { IsBN, IsWalletPublicKey } from 'src/common/validators';
 import { BeforeInsert, BeforeUpdate, Column, Entity, ManyToOne } from 'typeorm';
 import { User } from './user.entity';
 
@@ -35,7 +35,7 @@ export class Transactions extends PureEntity {
   to: string;
 
   @Field(() => String)
-  @IsISBN()
+  @IsBN()
   @Column({ default: '0' })
   amount: string;
 

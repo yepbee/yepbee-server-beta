@@ -22,7 +22,7 @@ export class NftResolver {
 
   @Mutation(() => StakeToNftOutput)
   @Allow(['ValidUser'])
-  @AllowUserState(['None'])
+  // @AllowUserState(['None'])
   stakeToNft(
     @AuthUser() user: User,
     @Args() stakeToNftInput: StakeToNftInput,
@@ -32,7 +32,7 @@ export class NftResolver {
 
   @Mutation(() => StakeToNftOutput)
   @Allow(['ValidUser'])
-  @AllowUserState(['None'])
+  // @AllowUserState(['None'])
   unstakeToNft(
     @AuthUser() user: User,
     @Args() unstakeToNftInput: StakeToNftInput,

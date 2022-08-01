@@ -1,8 +1,7 @@
 import { ArgsType, Field, ObjectType } from '@nestjs/graphql';
-import { IsISBN } from 'class-validator';
 import { CoreOutput } from 'src/common/dtos';
 import { ResField } from 'src/common/result/result.decorator';
-import { IsWalletPublicKey } from 'src/common/validators';
+import { IsBN, IsWalletPublicKey } from 'src/common/validators';
 import { Column } from 'typeorm';
 
 @ArgsType()
@@ -13,7 +12,7 @@ export class StakeToNftInput {
   mintKey: string;
 
   @Field(() => String)
-  @IsISBN()
+  @IsBN({ min: '1' })
   @Column({ default: '0' })
   amount: string;
 }

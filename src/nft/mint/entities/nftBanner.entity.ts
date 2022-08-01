@@ -4,7 +4,6 @@ import { Type } from 'class-transformer';
 import {
   ArrayMaxSize,
   IsEnum,
-  IsISBN,
   IsLatitude,
   IsLongitude,
   IsNumber,
@@ -20,7 +19,7 @@ import {
   SERVICE_TAGS_MAX_SIZE,
 } from 'src/common/constants';
 import { CoreEntity } from 'src/common/entites';
-import { IsH3Index } from 'src/common/validators';
+import { IsBN, IsH3Index } from 'src/common/validators';
 import { User } from 'src/users/entities/user.entity';
 import {
   BeforeInsert,
@@ -50,7 +49,7 @@ export class NftBanner extends CoreEntity {
   @Column({ default: 0 })
   likes: number;
   @Field(() => String)
-  @IsISBN()
+  @IsBN()
   @Column({ default: '0' })
   stakes: string;
 
