@@ -24,7 +24,7 @@ export class AppService {
   ) {}
 
   welcome(): string {
-    return 'Welcome To Retrip! 2022.7.16 17:13';
+    return 'Welcome To Yepbee! 2022.8.3 14:41';
   }
 
   keys(): AccountKeys {
