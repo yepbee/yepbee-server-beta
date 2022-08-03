@@ -1,3 +1,3 @@
 export type NftModuleOptions = {
-  rtrpPerLikingBanner: number;
+  yepbPerLikingBanner: number;
 };

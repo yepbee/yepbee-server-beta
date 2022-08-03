@@ -25,7 +25,7 @@ export class ValidationService {
   readonly TD_MIN: number;
   readonly TD_MAX: number;
   readonly RD_MAX: number;
-  readonly RTRP_PER_HONEYCON: number;
+  readonly YEPB_PER_HONEYCON: number;
   readonly TEMPERATURE_MIN: number;
   readonly TEMPERATURE_MAX: number;
   constructor(
@@ -41,7 +41,7 @@ export class ValidationService {
     this.TD_MIN = this.options.timeDistanceMinBoundary;
     this.TD_MAX = this.options.timeDistanceMaxBoundary;
     this.RD_MAX = this.options.rewardsOnedayMax;
-    this.RTRP_PER_HONEYCON = this.options.rtrpPerHoneycon;
+    this.YEPB_PER_HONEYCON = this.options.yepbPerHoneycon;
     this.TEMPERATURE_MIN = -99.0;
     this.TEMPERATURE_MAX = 99.0;
   }
@@ -94,7 +94,7 @@ export class ValidationService {
     try {
       txhash = await this.web3Service.transferSystemToken(
         this.web3Service.newPublicKey(tokenAccount),
-        this.RTRP_PER_HONEYCON * rewards,
+        this.YEPB_PER_HONEYCON * rewards,
       );
     } catch (e) {
       // records errors
@@ -104,11 +104,11 @@ export class ValidationService {
     console.log('recording the transaction...');
     const tx = this.transactionsRepository.create({
       owner: user,
-      currency: CurrencyType.RTRP,
+      currency: CurrencyType.YEPB,
       txhash,
       from: this.web3Service.masterPubkey.toString(),
       to: user.pubkey,
-      amount: (this.RTRP_PER_HONEYCON * rewards).toString(),
+      amount: (this.YEPB_PER_HONEYCON * rewards).toString(),
       type: TransactionType.Reward,
     });
 

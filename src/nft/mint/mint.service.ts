@@ -35,8 +35,8 @@ import { StringOutput } from 'src/common/dtos';
 @Injectable()
 export class MintService {
   readonly MINTING_RESOLUTION: number;
-  readonly RTRP_PER_UPLOADING_ARWEAVE: number;
-  readonly RTRP_PER_MINTING_BANNER: number;
+  readonly YEPB_PER_UPLOADING_ARWEAVE: number;
+  readonly YEPB_PER_MINTING_BANNER: number;
   readonly TEMPERATURE_MIN: number;
   readonly TEMPERATURE_MAX: number;
   constructor(
@@ -55,8 +55,8 @@ export class MintService {
     private readonly transactionsRepository: Repository<Transactions>,
   ) {
     this.MINTING_RESOLUTION = this.options.h3MintingResolution;
-    this.RTRP_PER_UPLOADING_ARWEAVE = this.options.rtrpPerUploadingToArweave;
-    this.RTRP_PER_MINTING_BANNER = this.options.rtrpPerMintingBanner;
+    this.YEPB_PER_UPLOADING_ARWEAVE = this.options.yepbPerUploadingToArweave;
+    this.YEPB_PER_MINTING_BANNER = this.options.yepbPerMintingBanner;
     this.TEMPERATURE_MIN = -99.0;
     this.TEMPERATURE_MAX = 99.0;
   }
@@ -93,9 +93,9 @@ export class MintService {
 
     const creatorBalance = await this.web3Service.getBalance(user);
 
-    if (creatorBalance < this.RTRP_PER_MINTING_BANNER)
+    if (creatorBalance < this.YEPB_PER_MINTING_BANNER)
       throw new Error(
-        `Insufficient token balance : ${creatorBalance} should be more than ${this.RTRP_PER_MINTING_BANNER}`,
+        `Insufficient token balance : ${creatorBalance} should be more than ${this.YEPB_PER_MINTING_BANNER}`,
       );
 
     const chunks = [];
@@ -248,11 +248,11 @@ export class MintService {
 
     switch (user.state) {
       case AuthUserState.UploadingToArweave:
-        paybackCost = this.RTRP_PER_UPLOADING_ARWEAVE;
+        paybackCost = this.YEPB_PER_UPLOADING_ARWEAVE;
         break;
       case AuthUserState.MintingBanner:
         paybackCost =
-          this.RTRP_PER_UPLOADING_ARWEAVE + this.RTRP_PER_MINTING_BANNER;
+          this.YEPB_PER_UPLOADING_ARWEAVE + this.YEPB_PER_MINTING_BANNER;
         break;
     }
 

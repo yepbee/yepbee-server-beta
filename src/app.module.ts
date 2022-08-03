@@ -112,18 +112,18 @@ import { NftModule } from './nft/nft.module';
       timeDistanceMinBoundary: +_.ENVS.VALIDATOR_TIME_DISTANCE_MIN_BOUNDARY,
       timeDistanceMaxBoundary: +_.ENVS.VALIDATOR_TIME_DISTANCE_MAX_BOUNDARY,
       rewardsOnedayMax: +_.ENVS.VALIDATOR_MAX_ONEDAY_REWARDS,
-      rtrpPerHoneycon: +_.ENVS.SERVICE_RTRP_PER_HONEYCON,
+      yepbPerHoneycon: +_.ENVS.SERVICE_YEPB_PER_HONEYCON,
     }),
     InventoryModule.forRoot({
       maxOutputLength: INVENTORY_MAX_OUTPUT_LENGTH,
     }),
     MintModule.forRoot({
       h3MintingResolution: +_.ENVS.H3_MINTING_RESOLUTION,
-      rtrpPerUploadingToArweave: +_.ENVS.SERVICE_RTRP_PER_UPLOADING_TO_ARWEAVE,
-      rtrpPerMintingBanner: +_.ENVS.SERVICE_RTRP_PER_MINTING_BANNER,
+      yepbPerUploadingToArweave: +_.ENVS.SERVICE_YEPB_PER_UPLOADING_TO_ARWEAVE,
+      yepbPerMintingBanner: +_.ENVS.SERVICE_YEPB_PER_MINTING_BANNER,
     }),
     NftModule.forRoot({
-      rtrpPerLikingBanner: +_.ENVS.SERVICE_RTRP_PER_LIKING_BANNER,
+      yepbPerLikingBanner: +_.ENVS.SERVICE_YEPB_PER_LIKING_BANNER,
     }),
   ],
   controllers: [AppController],

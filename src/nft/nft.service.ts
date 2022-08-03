@@ -17,7 +17,7 @@ import { NftModuleOptions } from './nft.interface';
 
 @Injectable()
 export class NftService {
-  readonly RTRP_PER_LIKING_BANNER: number;
+  readonly YEPB_PER_LIKING_BANNER: number;
   constructor(
     @Inject(KEY_OPTIONS) private readonly options: NftModuleOptions,
     private readonly web3Service: Web3Service,
@@ -30,7 +30,7 @@ export class NftService {
     @InjectRepository(Transactions)
     private readonly transactionsRepository: Repository<Transactions>,
   ) {
-    this.RTRP_PER_LIKING_BANNER = this.options.rtrpPerLikingBanner;
+    this.YEPB_PER_LIKING_BANNER = this.options.yepbPerLikingBanner;
   }
 
   @AsyncTryCatch()
@@ -44,14 +44,14 @@ export class NftService {
     if (user.likedBanners.find((v) => v.mintKey === nft.mintKey))
       return Err(`Already liked Nft`);
 
-    let txhash = await this.web3Service.pay(user, this.RTRP_PER_LIKING_BANNER);
+    let txhash = await this.web3Service.pay(user, this.YEPB_PER_LIKING_BANNER);
     try {
       await this.web3Service.recordingTransaction(
         user,
         txhash,
         user.pubkey,
         this.web3Service.masterPubkeyString,
-        this.RTRP_PER_LIKING_BANNER,
+        this.YEPB_PER_LIKING_BANNER,
         TransactionType.Like,
       );
     } catch (e) {
@@ -67,7 +67,7 @@ export class NftService {
       // txhash = await this.web3Service.likeNFT(userPublicKey, mintKeyPublicKey);
       txhash = Keypair.generate().publicKey.toString(); // for testing
     } catch (e) {
-      const paybackAmount = this.RTRP_PER_LIKING_BANNER * 0.5;
+      const paybackAmount = this.YEPB_PER_LIKING_BANNER * 0.5;
       const txhash = await this.web3Service.payback(user, paybackAmount);
       try {
         await this.web3Service.recordingTransaction(

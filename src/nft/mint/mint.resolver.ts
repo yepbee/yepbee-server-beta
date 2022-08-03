@@ -59,7 +59,7 @@ export class MintResolver {
                 this.mintsServise.uploadToArweave(user, uploadToArweaveInput), // upload
               {
                 payType: TransactionType.Upload,
-                payAmount: this.mintsServise.RTRP_PER_UPLOADING_ARWEAVE,
+                payAmount: this.mintsServise.YEPB_PER_UPLOADING_ARWEAVE,
               },
             ),
           {
@@ -88,7 +88,7 @@ export class MintResolver {
               () => this.mintsServise.mintBanner(user), // mint
               {
                 payType: TransactionType.Mint,
-                payAmount: this.mintsServise.RTRP_PER_MINTING_BANNER,
+                payAmount: this.mintsServise.YEPB_PER_MINTING_BANNER,
               },
             ),
           {

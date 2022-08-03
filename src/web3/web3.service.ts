@@ -241,7 +241,7 @@ export class Web3Service {
   /**
    *
    * @param toTA
-   * @param amount 1 = 0.001 rtrp
+   * @param amount 1 = 0.001 yepb
    * @param fromPubkey
    * @param fromTA
    * @returns
@@ -338,7 +338,7 @@ export class Web3Service {
     console.log('recording the transaction...');
     const tx = this.transactionsRepository.create({
       owner: user,
-      currency: CurrencyType.RTRP,
+      currency: CurrencyType.YEPB,
       txhash,
       from: this.masterPubkeyString,
       to: user.pubkey,
@@ -498,7 +498,7 @@ export class Web3Service {
     console.log('recording the transaction...');
     const tx = this.transactionsRepository.create({
       owner: user,
-      currency: CurrencyType.RTRP,
+      currency: CurrencyType.YEPB,
       txhash,
       from,
       to,

@@ -66,7 +66,7 @@ export enum RtimeId {
 
 export enum CurrencyType {
   Sol,
-  RTRP,
+  YEPB,
 }
 
 export enum TransactionType {
