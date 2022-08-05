@@ -30,6 +30,7 @@ export class InventoryService {
   @AsyncTryCatch()
   async getBanners({
     where,
+    order,
     amount,
     index,
   }: GetBannersInput): Promise<GetBannersOutput> {
@@ -39,9 +40,7 @@ export class InventoryService {
       relations: ['creatorUser', 'ownerUser', 'tags'], // !TODO: tags
       take: amount,
       skip: amount * index,
-      order: {
-        likes: 'DESC',
-      },
+      order,
     });
     console.log(result.map((v) => v.likes));
     return Ok(result);
@@ -50,6 +49,7 @@ export class InventoryService {
   async getBannersByH3Ring({
     h3Center,
     radius,
+    order,
     amount,
     index,
   }: GetBannersByH3RingInput): Promise<GetBannersByH3RingOutput> {
@@ -59,9 +59,7 @@ export class InventoryService {
       relations: ['creatorUser', 'ownerUser', 'tags'],
       take: amount,
       skip: amount * index,
-      order: {
-        likes: 'DESC',
-      },
+      order,
     });
     return Ok(result);
   }
@@ -70,6 +68,7 @@ export class InventoryService {
     latitude,
     longitude,
     radiusM,
+    order,
     amount,
     index,
   }: // maxCount = 20, * by likes
@@ -99,9 +98,7 @@ export class InventoryService {
       relations: ['creatorUser', 'ownerUser', 'tags'],
       take: amount,
       skip: amount * index,
-      order: {
-        likes: 'DESC',
-      },
+      order,
     });
     return Ok(result);
   }

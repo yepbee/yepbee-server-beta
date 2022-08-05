@@ -43,6 +43,11 @@ export const contentTypes = {
   'image/png': '',
 };
 
+export enum OrderValue {
+  Asc = 'ASC',
+  Desc = 'DESC',
+}
+
 export enum AuthRole {
   Unknown = 'Unknown', // has no pubkey
   Guest = 'Guest', // not yet signed
@@ -81,6 +86,7 @@ export enum TransactionType {
   Unknown,
 }
 
+registerEnumType(OrderValue, { name: 'OrderValue' });
 registerEnumType(RtimeId, { name: 'RtimeId' });
 registerEnumType(CurrencyType, { name: 'CurrencyType' });
 registerEnumType(TransactionType, { name: 'TransactionType' });

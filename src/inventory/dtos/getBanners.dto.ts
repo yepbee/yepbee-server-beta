@@ -18,7 +18,8 @@ import { CoreOutput } from 'src/common/dtos';
 import { ResField } from 'src/common/result/result.decorator';
 import { User } from 'src/users/entities/user.entity';
 import { NftBanner } from 'src/nft/mint/entities/nftBanner.entity';
-import { INVENTORY_MAX_OUTPUT_LENGTH } from 'src/common/constants';
+import { INVENTORY_MAX_OUTPUT_LENGTH, OrderValue } from 'src/common/constants';
+import { PartialBannerOrder } from './partialBannerOrder.dto';
 
 @InputType()
 export class PartialBannerInput extends PartialType(
@@ -40,6 +41,11 @@ export class GetBannersInput {
   @ArrayMaxSize(30) // temporary
   @ValidateNested({ each: true })
   where: PartialBannerInput[];
+  @Field(() => PartialBannerOrder, {
+    defaultValue: PartialBannerOrder.new({ likes: OrderValue.Desc }),
+  })
+  @ValidateNested()
+  order: PartialBannerOrder;
 
   @Field(() => Number, { defaultValue: INVENTORY_MAX_OUTPUT_LENGTH })
   @IsNumber()
